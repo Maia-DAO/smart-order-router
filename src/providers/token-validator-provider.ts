@@ -1,4 +1,3 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
 import _ from 'lodash';
 
 import { ITokenValidator__factory } from '../types/other/factories/ITokenValidator__factory';
@@ -8,6 +7,9 @@ import {
   MetricLoggerUnit,
   WRAPPED_NATIVE_CURRENCY,
 } from '../util';
+
+import { NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
 import { ICache } from './cache';
 import { IMulticallProvider } from './multicall-provider';
@@ -25,7 +27,7 @@ export enum TokenValidationResult {
 }
 
 export interface TokenValidationResults {
-  getValidationByToken(token: Token): TokenValidationResult | undefined;
+  getValidationByToken(token: NativeToken): TokenValidationResult | undefined;
 }
 
 const TOKEN_VALIDATOR_ADDRESS = '0xb5ee1690b7dcc7859771148d0889be838fe108e0';
@@ -47,7 +49,7 @@ export interface ITokenValidatorProvider {
    * @returns A token accessor with methods for accessing the tokens.
    */
   validateTokens(
-    tokens: Token[],
+    tokens: NativeToken[],
     providerConfig?: ProviderConfig
   ): Promise<TokenValidationResults>;
 }
@@ -71,7 +73,7 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
   }
 
   public async validateTokens(
-    tokens: Token[],
+    tokens: NativeToken[],
     providerConfig?: ProviderConfig
   ): Promise<TokenValidationResults> {
     const tokenAddressToToken = _.keyBy(tokens, 'address');
@@ -191,7 +193,7 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
     }
 
     return {
-      getValidationByToken: (token: Token) =>
+      getValidationByToken: (token: NativeToken) =>
         tokenToResult[token.address.toLowerCase()],
     };
   }

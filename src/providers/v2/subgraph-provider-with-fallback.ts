@@ -1,4 +1,4 @@
-import { Token } from '@uniswap/sdk-core';
+import { NativeToken } from 'maia-core-sdk';
 
 import { log } from '../../util';
 import { ProviderConfig } from '../provider';
@@ -20,8 +20,8 @@ export class V2SubgraphProviderWithFallBacks implements IV2SubgraphProvider {
   constructor(private fallbacks: IV2SubgraphProvider[]) {}
 
   public async getPools(
-    tokenIn?: Token,
-    tokenOut?: Token,
+    tokenIn?: NativeToken,
+    tokenOut?: NativeToken,
     providerConfig?: ProviderConfig
   ): Promise<V2SubgraphPool[]> {
     for (let i = 0; i < this.fallbacks.length; i++) {

@@ -1,21 +1,77 @@
-import { Token } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
-import { Pool } from '@uniswap/v3-sdk';
+import { TPool } from 'hermes-swap-router-sdk';
+import {
+  ComposableStablePool,
+  ComposableStablePoolWrapper,
+  Pair,
+  Pool,
+} from 'hermes-v2-sdk';
+import { NativeToken } from 'maia-core-sdk';
 
 import { log } from '../../../util/log';
 import { poolToString, routeToString } from '../../../util/routes';
-import { MixedRoute, V2Route, V3Route } from '../../router';
+import {
+  AllRoutes,
+  MixedRoute,
+  StableRoute,
+  StableWrapperRoute,
+  V2Route,
+  V3Route,
+} from '../../router';
+
+// TODO: Add support for multiple pools
+
+export function computeAllStableWrapperRoutes(
+  tokenIn: NativeToken,
+  tokenOut: NativeToken,
+  pools: ComposableStablePoolWrapper[],
+  maxHops: number
+): StableWrapperRoute[] {
+  return computeAllRoutes<ComposableStablePoolWrapper, StableWrapperRoute>(
+    tokenIn,
+    tokenOut,
+    (
+      route: ComposableStablePoolWrapper[],
+      tokenIn: NativeToken,
+      tokenOut: NativeToken
+    ) => {
+      return new StableWrapperRoute(route, tokenIn, tokenOut);
+    },
+    pools,
+    maxHops
+  );
+}
+
+export function computeAllStableRoutes(
+  tokenIn: NativeToken,
+  tokenOut: NativeToken,
+  pools: ComposableStablePool[],
+  maxHops: number
+): StableRoute[] {
+  return computeAllRoutes<ComposableStablePool, StableRoute>(
+    tokenIn,
+    tokenOut,
+    (
+      route: ComposableStablePool[],
+      tokenIn: NativeToken,
+      tokenOut: NativeToken
+    ) => {
+      return new StableRoute(route, tokenIn, tokenOut);
+    },
+    pools,
+    maxHops
+  );
+}
 
 export function computeAllV3Routes(
-  tokenIn: Token,
-  tokenOut: Token,
+  tokenIn: NativeToken,
+  tokenOut: NativeToken,
   pools: Pool[],
   maxHops: number
 ): V3Route[] {
   return computeAllRoutes<Pool, V3Route>(
     tokenIn,
     tokenOut,
-    (route: Pool[], tokenIn: Token, tokenOut: Token) => {
+    (route: Pool[], tokenIn: NativeToken, tokenOut: NativeToken) => {
       return new V3Route(route, tokenIn, tokenOut);
     },
     pools,
@@ -24,15 +80,15 @@ export function computeAllV3Routes(
 }
 
 export function computeAllV2Routes(
-  tokenIn: Token,
-  tokenOut: Token,
+  tokenIn: NativeToken,
+  tokenOut: NativeToken,
   pools: Pair[],
   maxHops: number
 ): V2Route[] {
   return computeAllRoutes<Pair, V2Route>(
     tokenIn,
     tokenOut,
-    (route: Pair[], tokenIn: Token, tokenOut: Token) => {
+    (route: Pair[], tokenIn: NativeToken, tokenOut: NativeToken) => {
       return new V2Route(route, tokenIn, tokenOut);
     },
     pools,
@@ -41,49 +97,59 @@ export function computeAllV2Routes(
 }
 
 export function computeAllMixedRoutes(
-  tokenIn: Token,
-  tokenOut: Token,
-  parts: (Pool | Pair)[],
+  tokenIn: NativeToken,
+  tokenOut: NativeToken,
+  parts: TPool[],
   maxHops: number
 ): MixedRoute[] {
-  const routesRaw = computeAllRoutes<Pool | Pair, MixedRoute>(
+  const routesRaw = computeAllRoutes<TPool, MixedRoute>(
     tokenIn,
     tokenOut,
-    (route: (Pool | Pair)[], tokenIn: Token, tokenOut: Token) => {
+    (route: TPool[], tokenIn: NativeToken, tokenOut: NativeToken) => {
       return new MixedRoute(route, tokenIn, tokenOut);
     },
     parts,
     maxHops
   );
-  /// filter out pure v3 and v2 routes
-  return routesRaw.filter((route) => {
-    return (
-      !route.pools.every((pool) => pool instanceof Pool) &&
-      !route.pools.every((pool) => pool instanceof Pair)
-    );
+
+  // Filter out routes with the same type
+  return routesRaw.filter((route: MixedRoute) => {
+    if (route.pools.length < 2) return false; // Skip routes with less than 2 pools (not possible to be mixed)
+
+    const firstPoolType = route.pools[0]?.constructor;
+    for (let i = 1; i < route.pools.length; i++) {
+      if (route.pools[i]?.constructor !== firstPoolType) {
+        return true; // Keep the route if there is a different type of pool
+      }
+    }
+    return false; // All pools are of the same type, so filter out this route
   });
 }
 
 export function computeAllRoutes<
-  TPool extends Pair | Pool,
-  TRoute extends V3Route | V2Route | MixedRoute
+  PoolType extends TPool,
+  TRoute extends AllRoutes
 >(
-  tokenIn: Token,
-  tokenOut: Token,
-  buildRoute: (route: TPool[], tokenIn: Token, tokenOut: Token) => TRoute,
-  pools: TPool[],
+  tokenIn: NativeToken,
+  tokenOut: NativeToken,
+  buildRoute: (
+    route: PoolType[],
+    tokenIn: NativeToken,
+    tokenOut: NativeToken
+  ) => TRoute,
+  pools: PoolType[],
   maxHops: number
 ): TRoute[] {
   const poolsUsed = Array<boolean>(pools.length).fill(false);
   const routes: TRoute[] = [];
 
   const computeRoutes = (
-    tokenIn: Token,
-    tokenOut: Token,
-    currentRoute: TPool[],
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
+    currentRoute: PoolType[],
     poolsUsed: boolean[],
     tokensVisited: Set<string>,
-    _previousTokenOut?: Token
+    _previousTokenOut?: NativeToken
   ) => {
     if (currentRoute.length > maxHops) {
       return;
@@ -103,13 +169,18 @@ export function computeAllRoutes<
       }
 
       const curPool = pools[i]!;
-      const previousTokenOut = _previousTokenOut ? _previousTokenOut : tokenIn;
 
-      if (!curPool.involvesToken(previousTokenOut)) {
+      if (currentRoute.find((pathPool) => poolEquals(curPool, pathPool))) {
         continue;
       }
 
-      const currentTokenOut = curPool.token0.equals(previousTokenOut)
+      const currentTokenIn = _previousTokenOut ? _previousTokenOut : tokenIn;
+
+      if (!curPool.involvesToken(currentTokenIn)) {
+        continue;
+      }
+
+      const currentTokenOut = curPool.token0.equals(currentTokenIn)
         ? curPool.token1
         : curPool.token0;
 
@@ -151,4 +222,22 @@ export function computeAllRoutes<
   );
 
   return routes;
+}
+
+/**
+ * Returns true if poolA is equivalent to poolB
+ * @param poolA one of the two pools
+ * @param poolB the other pool
+ * @dev This function is used to compare balancer stable pools to avoid duplicate routes
+ *      when computing mixed routes. V3 pools are already parsed by tokens used in the route
+ */
+function poolEquals(poolA: TPool, poolB: TPool): boolean {
+  if (
+    poolA instanceof ComposableStablePool &&
+    poolB instanceof ComposableStablePool
+  ) {
+    return poolA.pool.id === poolB.pool.id;
+  }
+
+  return false;
 }

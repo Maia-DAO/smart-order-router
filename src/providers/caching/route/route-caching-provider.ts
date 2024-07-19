@@ -1,17 +1,13 @@
 /**
- * Provider for getting token data from a Token List.
+ * Provider for getting token data from a NativeToken List.
  *
  * @export
  * @interface IRouteCachingProvider
  */
-import { Protocol } from '@uniswap/router-sdk';
-import {
-  ChainId,
-  Currency,
-  CurrencyAmount,
-  Token,
-  TradeType,
-} from '@uniswap/sdk-core';
+import { Protocol } from 'hermes-swap-router-sdk';
+import { TradeType } from 'hermes-v2-sdk';
+import { Currency, CurrencyAmount, NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
 import { CacheMode } from './model';
 import { CachedRoutes } from './model/cached-routes';
@@ -37,7 +33,7 @@ export abstract class IRouteCachingProvider {
     // Defined as a readonly member instead of a regular function to make it final.
     chainId: number,
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     protocols: Protocol[],
     blockNumber: number,
@@ -135,7 +131,7 @@ export abstract class IRouteCachingProvider {
   public abstract getCacheMode(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     protocols: Protocol[]
   ): Promise<CacheMode>;
@@ -164,7 +160,7 @@ export abstract class IRouteCachingProvider {
   protected abstract _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     protocols: Protocol[],
     currentBlockNumber: number,

@@ -1,4 +1,4 @@
-import { Fraction } from '@uniswap/sdk-core';
+import { Fraction } from 'maia-core-sdk';
 
 import { CurrencyAmount } from '../../../util/amounts';
 

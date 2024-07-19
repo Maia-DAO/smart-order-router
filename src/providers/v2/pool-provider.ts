@@ -1,8 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ChainId, Token } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
 import retry, { Options as RetryOptions } from 'async-retry';
+import { Pair } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
 import { IUniswapV2Pair__factory } from '../../types/v2/factories/IUniswapV2Pair__factory';
 import {
@@ -39,25 +40,25 @@ export interface IV2PoolProvider {
    * @returns A pool accessor with methods for accessing the pools.
    */
   getPools(
-    tokenPairs: [Token, Token][],
+    tokenPairs: [NativeToken, NativeToken][],
     providerConfig?: ProviderConfig
   ): Promise<V2PoolAccessor>;
 
   /**
    * Gets the pool address for the specified token pair.
    *
-   * @param tokenA Token A in the pool.
-   * @param tokenB Token B in the pool.
+   * @param tokenA NativeToken A in the pool.
+   * @param tokenB NativeToken B in the pool.
    * @returns The pool address and the two tokens.
    */
   getPoolAddress(
-    tokenA: Token,
-    tokenB: Token
-  ): { poolAddress: string; token0: Token; token1: Token };
+    tokenA: NativeToken,
+    tokenB: NativeToken
+  ): { poolAddress: string; token0: NativeToken; token1: NativeToken };
 }
 
 export type V2PoolAccessor = {
-  getPool: (tokenA: Token, tokenB: Token) => Pair | undefined;
+  getPool: (tokenA: NativeToken, tokenB: NativeToken) => Pair | undefined;
   getPoolByAddress: (address: string) => Pair | undefined;
   getAllPools: () => Pair[];
 };
@@ -88,11 +89,11 @@ export class V2PoolProvider implements IV2PoolProvider {
   ) {}
 
   public async getPools(
-    tokenPairs: [Token, Token][],
+    tokenPairs: [NativeToken, NativeToken][],
     providerConfig?: ProviderConfig
   ): Promise<V2PoolAccessor> {
     const poolAddressSet: Set<string> = new Set<string>();
-    const sortedTokenPairs: Array<[Token, Token]> = [];
+    const sortedTokenPairs: Array<[NativeToken, NativeToken]> = [];
     const sortedPoolAddresses: string[] = [];
 
     for (const tokenPair of tokenPairs) {
@@ -150,7 +151,7 @@ export class V2PoolProvider implements IV2PoolProvider {
 
     const poolAddressToPool: { [poolAddress: string]: Pair } = {};
 
-    const invalidPools: [Token, Token][] = [];
+    const invalidPools: [NativeToken, NativeToken][] = [];
 
     for (let i = 0; i < sortedPoolAddresses.length; i++) {
       const reservesResult = reservesResults[i]!;
@@ -167,19 +168,19 @@ export class V2PoolProvider implements IV2PoolProvider {
         tokenPropertiesMap[token0.address.toLowerCase()]
           ?.tokenValidationResult === TokenValidationResult.FOT
       ) {
-        token0 = new Token(
+        token0 = new NativeToken(
           token0.chainId,
           token0.address,
           token0.decimals,
           token0.symbol,
           token0.name,
-          true, // at this point we know it's valid token address
-          tokenPropertiesMap[
-            token0.address.toLowerCase()
-          ]?.tokenFeeResult?.buyFeeBps,
-          tokenPropertiesMap[
-            token0.address.toLowerCase()
-          ]?.tokenFeeResult?.sellFeeBps
+          true // at this point we know it's valid token address
+          // tokenPropertiesMap[
+          //   token0.address.toLowerCase()
+          // ]?.tokenFeeResult?.buyFeeBps,
+          // tokenPropertiesMap[
+          //   token0.address.toLowerCase()
+          // ]?.tokenFeeResult?.sellFeeBps
         );
       }
 
@@ -187,19 +188,19 @@ export class V2PoolProvider implements IV2PoolProvider {
         tokenPropertiesMap[token1.address.toLowerCase()]
           ?.tokenValidationResult === TokenValidationResult.FOT
       ) {
-        token1 = new Token(
+        token1 = new NativeToken(
           token1.chainId,
           token1.address,
           token1.decimals,
           token1.symbol,
           token1.name,
-          true, // at this point we know it's valid token address
-          tokenPropertiesMap[
-            token1.address.toLowerCase()
-          ]?.tokenFeeResult?.buyFeeBps,
-          tokenPropertiesMap[
-            token1.address.toLowerCase()
-          ]?.tokenFeeResult?.sellFeeBps
+          true // at this point we know it's valid token address
+          // tokenPropertiesMap[
+          //   token1.address.toLowerCase()
+          // ]?.tokenFeeResult?.buyFeeBps,
+          // tokenPropertiesMap[
+          //   token1.address.toLowerCase()
+          // ]?.tokenFeeResult?.sellFeeBps
         );
       }
 
@@ -232,7 +233,7 @@ export class V2PoolProvider implements IV2PoolProvider {
     log.debug({ poolStrs }, `Found ${poolStrs.length} valid pools`);
 
     return {
-      getPool: (tokenA: Token, tokenB: Token): Pair | undefined => {
+      getPool: (tokenA: NativeToken, tokenB: NativeToken): Pair | undefined => {
         const { poolAddress } = this.getPoolAddress(tokenA, tokenB);
         return poolAddressToPool[poolAddress];
       },
@@ -243,9 +244,9 @@ export class V2PoolProvider implements IV2PoolProvider {
   }
 
   public getPoolAddress(
-    tokenA: Token,
-    tokenB: Token
-  ): { poolAddress: string; token0: Token; token1: Token } {
+    tokenA: NativeToken,
+    tokenB: NativeToken
+  ): { poolAddress: string; token0: NativeToken; token1: NativeToken } {
     const [token0, token1] = tokenA.sortsBefore(tokenB)
       ? [tokenA, tokenB]
       : [tokenB, tokenA];
@@ -288,8 +289,10 @@ export class V2PoolProvider implements IV2PoolProvider {
   }
 
   // We are using ES2017. ES2019 has native flatMap support
-  private flatten(tokenPairs: Array<[Token, Token]>): Token[] {
-    const tokens = new Array<Token>();
+  private flatten(
+    tokenPairs: Array<[NativeToken, NativeToken]>
+  ): NativeToken[] {
+    const tokens = new Array<NativeToken>();
 
     for (const [tokenA, tokenB] of tokenPairs) {
       tokens.push(tokenA);

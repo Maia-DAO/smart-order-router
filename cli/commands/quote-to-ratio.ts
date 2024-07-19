@@ -1,14 +1,14 @@
 import { Logger } from '@ethersproject/logger';
 import { flags } from '@oclif/command';
-import { Currency, Ether, Fraction, Percent } from '@uniswap/sdk-core';
-import { Position } from '@uniswap/v3-sdk';
 import dotenv from 'dotenv';
+import { Position } from 'hermes-v2-sdk';
+import { Currency, Ether, Fraction, Percent } from 'maia-core-sdk';
 import {
   ID_TO_CHAIN_ID,
-  parseAmount,
   SwapToRatioResponse,
   SwapToRatioStatus,
   SwapType,
+  parseAmount,
 } from '../../src';
 import { BaseCommand } from '../base-command';
 
@@ -81,7 +81,9 @@ export class QuoteToRatio extends BaseCommand {
 
     const poolAccessor = await this.poolProvider.getPools(
       [[token0.wrapped, token1.wrapped, feeAmount]],
-      { blockNumber: this.blockNumber }
+      {
+        blockNumber: this.blockNumber,
+      }
     );
 
     const pool = poolAccessor.getPool(

@@ -1,6 +1,6 @@
-# Uniswap Smart Order Router
+# Smart Order Router
 
-This repository contains routing logic for the Uniswap V3 protocol.
+This repository contains routing logic for Uniswap, Balancer Composable Stable Pool and ERC4626 vaults.
 
 It searches for the most efficient way to swap token A for token B, considering splitting swaps across multiple routes and gas costs.
 
@@ -8,10 +8,10 @@ It searches for the most efficient way to swap token A for token B, considering 
 
 ### Unit Tests
 
-First make sure you have run `npm install` and `npm run build`.
+First make sure you have run `yarn` and `yarn build`.
 
 ```
-npm run test
+yarn test
 ```
 
 ### Integration Tests
@@ -19,7 +19,7 @@ npm run test
 Make sure the `.env` file is configured to connect to mainnet and other chains. See the [CLI](#cli) section below for more details.
 
 ```
-npm run integ-test
+yarn integ-test
 ```
 
 ### Tenderly Simulations
@@ -249,7 +249,7 @@ The main components to complete are:
 - Populate `test/integ/routers/alpha-router/alpha-router.integration.test.ts` and `src/providers/v2/static-subgraph-provider.ts`
 - Populate `src/routers/alpha-router/*`
 - Add a log to `/CHANGELOG.md`
-- Run `npm run integ-test` successfully
+- Run `yarn integ-test` successfully
 
 # Troubleshooting
 

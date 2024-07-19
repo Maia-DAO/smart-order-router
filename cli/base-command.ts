@@ -4,20 +4,25 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Command, flags } from '@oclif/command';
 import { ParserOutput } from '@oclif/parser/lib/parse';
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
-import { ChainId, Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { MethodParameters } from '@uniswap/v3-sdk';
 import bunyan, { default as Logger } from 'bunyan';
 import bunyanDebugStream from 'bunyan-debug-stream';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
 
 import {
+  ChainId,
+  Currency,
+  CurrencyAmount,
+  MethodParameters,
+  NativeToken,
+} from 'maia-core-sdk';
+import {
   AlphaRouter,
+  CHAIN_IDS_LIST,
   CachingGasStationProvider,
   CachingTokenListProvider,
   CachingTokenProviderWithFallback,
   CachingV3PoolProvider,
-  CHAIN_IDS_LIST,
   EIP1559GasPriceProvider,
   EthEstimateGasSimulator,
   FallbackTenderlySimulator,
@@ -33,10 +38,7 @@ import {
   MetricLogger,
   NodeJSCache,
   OnChainQuoteProvider,
-  routeAmountsToString,
   RouteWithValidQuote,
-  setGlobalLogger,
-  setGlobalMetric,
   SimulationStatus,
   TenderlySimulator,
   TokenPropertiesProvider,
@@ -44,14 +46,13 @@ import {
   UniswapMulticallProvider,
   V2PoolProvider,
   V3PoolProvider,
-  V3RouteWithValidQuote
+  V3RouteWithValidQuote,
+  routeAmountsToString,
+  setGlobalLogger,
+  setGlobalMetric,
 } from '../src';
-import {
-  LegacyGasPriceProvider
-} from '../src/providers/legacy-gas-price-provider';
-import {
-  OnChainGasPriceProvider
-} from '../src/providers/on-chain-gas-price-provider';
+import { LegacyGasPriceProvider } from '../src/providers/legacy-gas-price-provider';
+import { OnChainGasPriceProvider } from '../src/providers/on-chain-gas-price-provider';
 import { PortionProvider } from '../src/providers/portion-provider';
 import { OnChainTokenFeeFetcher } from '../src/providers/token-fee-fetcher';
 
@@ -135,8 +136,8 @@ export abstract class BaseCommand extends Command {
     return this._log
       ? this._log
       : bunyan.createLogger({
-        name: 'Default Logger',
-      });
+          name: 'Default Logger',
+        });
   }
 
   get router() {
@@ -206,19 +207,19 @@ export abstract class BaseCommand extends Command {
       streams: debugJSON
         ? undefined
         : [
-          {
-            level: logLevel,
-            type: 'stream',
-            stream: bunyanDebugStream({
-              basepath: __dirname,
-              forceColor: false,
-              showDate: false,
-              showPid: false,
-              showLoggerName: false,
-              showLevel: !!debug,
-            }),
-          },
-        ],
+            {
+              level: logLevel,
+              type: 'stream',
+              stream: bunyanDebugStream({
+                basepath: __dirname,
+                forceColor: false,
+                showDate: false,
+                showPid: false,
+                showLoggerName: false,
+                showLevel: !!debug,
+              }),
+            },
+          ],
     });
 
     if (debug || debugJSON) {
@@ -237,7 +238,7 @@ export abstract class BaseCommand extends Command {
     const provider = new JsonRpcProvider(chainProvider, chainId);
     this._blockNumber = await provider.getBlockNumber();
 
-    const tokenCache = new NodeJSCache<Token>(
+    const tokenCache = new NodeJSCache<NativeToken>(
       new NodeCache({ stdTTL: 3600, useClones: false })
     );
 
@@ -291,16 +292,17 @@ export abstract class BaseCommand extends Command {
         new V3PoolProvider(chainId, multicall2Provider),
         new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
       );
-      const tokenFeeFetcher = new OnChainTokenFeeFetcher(
-        chainId,
-        provider
-      )
+      const tokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider);
       const tokenPropertiesProvider = new TokenPropertiesProvider(
         chainId,
         new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false })),
         tokenFeeFetcher
-      )
-      const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider);
+      );
+      const v2PoolProvider = new V2PoolProvider(
+        chainId,
+        multicall2Provider,
+        tokenPropertiesProvider
+      );
 
       const portionProvider = new PortionProvider();
       const tenderlySimulator = new TenderlySimulator(
@@ -309,15 +311,11 @@ export abstract class BaseCommand extends Command {
         process.env.TENDERLY_USER!,
         process.env.TENDERLY_PROJECT!,
         process.env.TENDERLY_ACCESS_KEY!,
-        process.env.TENDERLY_NODE_API_KEY!,
         v2PoolProvider,
         v3PoolProvider,
         provider,
         portionProvider,
-        { [ChainId.ARBITRUM_ONE]: 1 },
-        5000,
-        100,
-        [ChainId.MAINNET]
+        { [ChainId.ARBITRUM_ONE]: 1 }
       );
 
       const ethEstimateGasSimulator = new EthEstimateGasSimulator(
@@ -368,7 +366,7 @@ export abstract class BaseCommand extends Command {
     blockNumber: BigNumber,
     estimatedGasUsed: BigNumber,
     gasPriceWei: BigNumber,
-    simulationStatus?: SimulationStatus,
+    simulationStatus?: SimulationStatus
   ) {
     this.logger.info(`Best Route:`);
     this.logger.info(`${routeAmountsToString(routeAmounts)}`);
@@ -385,7 +383,7 @@ export abstract class BaseCommand extends Command {
     );
     this.logger.info(``);
     this.logger.info(
-      `Gas Used Quote Token: ${estimatedGasUsedQuoteToken.toFixed(
+      `Gas Used Quote NativeToken: ${estimatedGasUsedQuoteToken.toFixed(
         Math.min(estimatedGasUsedQuoteToken.currency.decimals, 6)
       )}`
     );
@@ -394,7 +392,7 @@ export abstract class BaseCommand extends Command {
         Math.min(estimatedGasUsedUSD.currency.decimals, 6)
       )}`
     );
-    if(estimatedGasUsedGasToken) {
+    if (estimatedGasUsedGasToken) {
       this.logger.info(
         `Gas Used gas token: ${estimatedGasUsedGasToken.toFixed(
           Math.min(estimatedGasUsedGasToken.currency.decimals, 6)

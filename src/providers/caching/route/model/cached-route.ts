@@ -1,10 +1,17 @@
-import { Protocol } from '@uniswap/router-sdk';
-import { Token } from '@uniswap/sdk-core';
-import { Pool } from '@uniswap/v3-sdk';
+import { Protocol } from 'hermes-swap-router-sdk';
+import { ComposableStablePool, Pair, Pool } from 'hermes-v2-sdk';
+import { NativeToken } from 'maia-core-sdk';
 
-import { MixedRoute, V2Route, V3Route } from '../../../../routers';
+import {
+  AllRoutes,
+  MixedRoute,
+  StableRoute,
+  StableWrapperRoute,
+  V2Route,
+  V3Route,
+} from '../../../../routers';
 
-interface CachedRouteParams<Route extends V3Route | V2Route | MixedRoute> {
+interface CachedRouteParams<Route extends AllRoutes> {
   route: Route;
   percent: number;
 }
@@ -15,7 +22,7 @@ interface CachedRouteParams<Route extends V3Route | V2Route | MixedRoute> {
  * @export
  * @class CachedRoute
  */
-export class CachedRoute<Route extends V3Route | V2Route | MixedRoute> {
+export class CachedRoute<Route extends AllRoutes> {
   public readonly route: Route;
   public readonly percent: number;
   // Hashing function copying the same implementation as Java's `hashCode`
@@ -36,11 +43,11 @@ export class CachedRoute<Route extends V3Route | V2Route | MixedRoute> {
     return this.route.protocol;
   }
 
-  public get tokenIn(): Token {
+  public get tokenIn(): NativeToken {
     return this.route.input;
   }
 
-  public get tokenOut(): Token {
+  public get tokenOut(): NativeToken {
     return this.route.output;
   }
 
@@ -53,6 +60,22 @@ export class CachedRoute<Route extends V3Route | V2Route | MixedRoute> {
             `[V3]${pool.token0.address}/${pool.token1.address}/${pool.fee}`
         )
         .join('->');
+    } else if (this.protocol == Protocol.BAL_STABLE) {
+      const route = this.route as StableRoute;
+      return route.pools
+        .map((pool) => {
+          return `[BAL_STABLE]${pool.pool.id}/{pool.token0.address}/${pool.token1.address}`;
+        })
+        .join('->');
+    } else if (this.protocol == Protocol.BAL_STABLE_WRAPPER) {
+      const route = this.route as StableWrapperRoute;
+      return route.pools
+        .map((pool) => {
+          return `[VAULT]${pool.vault().address}/${pool.token0.address}/${
+            pool.token1.address
+          }`;
+        })
+        .join('->');
     } else if (this.protocol == Protocol.V2) {
       const route = this.route as V2Route;
       return route.pairs
@@ -64,8 +87,14 @@ export class CachedRoute<Route extends V3Route | V2Route | MixedRoute> {
         .map((pool) => {
           if (pool instanceof Pool) {
             return `[V3]${pool.token0.address}/${pool.token1.address}/${pool.fee}`;
-          } else {
+          } else if (pool instanceof Pair) {
             return `[V2]${pool.token0.address}/${pool.token1.address}`;
+          } else if (pool instanceof ComposableStablePool) {
+            return `[BAL_STABLE]${pool.pool.id}/{pool.token0.address}/${pool.token1.address}`;
+          } else {
+            return `[VAULT]${pool.vault().address}/${pool.token0.address}/${
+              pool.token1.address
+            }`;
           }
         })
         .join('->');

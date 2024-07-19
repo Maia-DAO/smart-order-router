@@ -1,7 +1,7 @@
-import { MixedRoute, V2Route, V3Route } from '../../../../router';
+import { AllRoutes } from '../../../../router';
 import { CandidatePoolsBySelectionCriteria } from '../../../functions/get-candidate-pools';
 
-export interface GetRoutesResult<Route extends V2Route | V3Route | MixedRoute> {
+export interface GetRoutesResult<Route extends AllRoutes> {
   routes: Route[];
   candidatePools: CandidatePoolsBySelectionCriteria;
 }

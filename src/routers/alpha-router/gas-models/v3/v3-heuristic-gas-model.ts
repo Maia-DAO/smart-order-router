@@ -1,13 +1,33 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ChainId, Price } from '@uniswap/sdk-core';
-import { Pool } from '@uniswap/v3-sdk';
+import { Pool, TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, Percent, Price } from 'maia-core-sdk';
 
-import { WRAPPED_NATIVE_CURRENCY } from '../../../..';
+import {
+  SwapOptionsUniversalRouter,
+  SwapType,
+  WRAPPED_NATIVE_CURRENCY,
+} from '../../../..';
+import {
+  ArbitrumGasData,
+  OptimismGasData,
+} from '../../../../providers/v3/gas-data-provider';
 import { CurrencyAmount } from '../../../../util/amounts';
-import { calculateL1GasFeesHelper } from '../../../../util/gas-factory-helpers';
+import {
+  calculateArbitrumToL1FeeFromCalldata,
+  getL2ToL1GasUsed,
+} from '../../../../util/gas-factory-helpers';
 import { log } from '../../../../util/log';
-import { V3RouteWithValidQuote } from '../../entities/route-with-valid-quote';
+import {
+  buildSwapMethodParameters,
+  buildTrade,
+} from '../../../../util/methodParameters';
+import {
+  BaseRouteWithValidQuote,
+  StableRouteWithValidQuote,
+  StableWrapperRouteWithValidQuote,
+  V3RouteWithValidQuote,
+} from '../../entities/route-with-valid-quote';
 import {
   BuildOnChainGasModelFactoryType,
   GasModelProviderConfig,
@@ -17,14 +37,24 @@ import {
 } from '../gas-model';
 
 import {
+  BASE_SWAP_COST as BASE_SWAP_COST_STABLE,
+  COST_PER_HOP as COST_PER_HOP_STABLE,
+  SINGLE_HOP_OVERHEAD as SINGLE_HOP_OVERHEAD_STABLE,
+  TOKEN_OVERHEAD as TOKEN_OVERHEAD_STABLE,
+} from './stable-gas-costs';
+import {
+  BASE_SWAP_COST as BASE_SWAP_COST_STABLE_WRAPPER,
+  COST_PER_HOP as COST_PER_HOP_STABLE_WRAPPER,
+  SINGLE_HOP_OVERHEAD as SINGLE_HOP_OVERHEAD_STABLE_WRAPPER,
+} from './stable-wrapper-gas-costs';
+import {
   BASE_SWAP_COST,
   COST_PER_HOP,
   COST_PER_INIT_TICK,
   COST_PER_UNINIT_TICK,
   SINGLE_HOP_OVERHEAD,
   TOKEN_OVERHEAD,
-} from './gas-costs';
-import { BaseProvider } from '@ethersproject/providers';
+} from './v3-gas-costs';
 
 /**
  * Computes a gas estimate for a V3 swap using heuristics.
@@ -45,11 +75,8 @@ import { BaseProvider } from '@ethersproject/providers';
  * @class V3HeuristicGasModelFactory
  */
 export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
-  private provider: BaseProvider;
-
-  constructor(provider: BaseProvider) {
+  constructor() {
     super();
-    this.provider = provider;
   }
 
   public async buildGasModel({
@@ -61,7 +88,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
     l2GasDataProvider,
     providerConfig,
   }: BuildOnChainGasModelFactoryType): Promise<
-    IGasModel<V3RouteWithValidQuote>
+    IGasModel<BaseRouteWithValidQuote>
   > {
     const l2GasData = l2GasDataProvider
       ? await l2GasDataProvider.getGasData(providerConfig)
@@ -70,22 +97,81 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
     const usdPool: Pool = pools.usdPool;
 
     const calculateL1GasFees = async (
-      route: V3RouteWithValidQuote[]
+      route: BaseRouteWithValidQuote[]
     ): Promise<{
       gasUsedL1: BigNumber;
       gasUsedL1OnL2: BigNumber;
       gasCostL1USD: CurrencyAmount;
       gasCostL1QuoteToken: CurrencyAmount;
     }> => {
-      return await calculateL1GasFeesHelper(
-        route,
-        chainId,
-        usdPool,
-        quoteToken,
-        pools.nativeAndQuoteTokenV3Pool,
-        this.provider,
-        l2GasData
+      const swapOptions: SwapOptionsUniversalRouter = {
+        type: SwapType.UNIVERSAL_ROUTER,
+        recipient: '0x0000000000000000000000000000000000000001',
+        deadlineOrPreviousBlockhash: 100,
+        slippageTolerance: new Percent(5, 10_000),
+      };
+      let l1Used = BigNumber.from(0);
+      let l1FeeInWei = BigNumber.from(0);
+      let gasUsedL1OnL2 = BigNumber.from(0);
+      const opStackChains = [ChainId.OPTIMISM];
+      if (opStackChains.includes(chainId)) {
+        [l1Used, l1FeeInWei] = this.calculateOptimismToL1SecurityFee(
+          route,
+          swapOptions,
+          l2GasData as OptimismGasData,
+          chainId
+        );
+      } else if (chainId == ChainId.ARBITRUM_ONE) {
+        [l1Used, l1FeeInWei, gasUsedL1OnL2] =
+          this.calculateArbitrumToL1SecurityFee(
+            route,
+            swapOptions,
+            l2GasData as ArbitrumGasData,
+            chainId
+          );
+      }
+
+      // wrap fee to native currency
+      const nativeCurrency = WRAPPED_NATIVE_CURRENCY[chainId];
+      const costNativeCurrency = CurrencyAmount.fromRawAmount(
+        nativeCurrency,
+        l1FeeInWei.toString()
       );
+
+      // convert fee into usd
+      const nativeTokenPrice =
+        usdPool.token0.address == nativeCurrency.address
+          ? usdPool.token0Price
+          : usdPool.token1Price;
+
+      const gasCostL1USD: CurrencyAmount =
+        nativeTokenPrice.quote(costNativeCurrency);
+
+      let gasCostL1QuoteToken = costNativeCurrency;
+      // if the inputted token is not in the native currency, quote a native/quote token pool to get the gas cost in terms of the quote token
+      if (!quoteToken.equals(nativeCurrency)) {
+        const nativePool: Pool | null = pools.nativeAndQuoteTokenV3Pool;
+        if (!nativePool) {
+          log.info(
+            'Could not find a pool to convert the cost into the quote token'
+          );
+          gasCostL1QuoteToken = CurrencyAmount.fromRawAmount(quoteToken, 0);
+        } else {
+          const nativeTokenPrice =
+            nativePool.token0.address == nativeCurrency.address
+              ? nativePool.token0Price
+              : nativePool.token1Price;
+          gasCostL1QuoteToken = nativeTokenPrice.quote(costNativeCurrency);
+        }
+      }
+      // gasUsedL1 is the gas units used calculated from the bytes of the calldata
+      // gasCostL1USD and gasCostL1QuoteToken is the cost of gas in each of those tokens
+      return {
+        gasUsedL1: l1Used,
+        gasUsedL1OnL2,
+        gasCostL1USD,
+        gasCostL1QuoteToken,
+      };
     };
 
     const nativeCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
@@ -99,7 +185,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       : usdPool.token0;
 
     const estimateGasCost = (
-      routeWithValidQuote: V3RouteWithValidQuote
+      routeWithValidQuote: BaseRouteWithValidQuote
     ): {
       gasEstimate: BigNumber;
       gasCostInToken: CurrencyAmount;
@@ -255,55 +341,194 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
   }
 
   private estimateGas(
-    routeWithValidQuote: V3RouteWithValidQuote,
+    routeWithValidQuote: BaseRouteWithValidQuote,
     gasPriceWei: BigNumber,
     chainId: ChainId,
     providerConfig?: GasModelProviderConfig
   ) {
-    const totalInitializedTicksCrossed = BigNumber.from(
-      Math.max(1, _.sum(routeWithValidQuote.initializedTicksCrossedList))
-    );
     const totalHops = BigNumber.from(routeWithValidQuote.route.pools.length);
 
-    let hopsGasUse = COST_PER_HOP(chainId).mul(totalHops);
+    if (routeWithValidQuote instanceof V3RouteWithValidQuote) {
+      const totalInitializedTicksCrossed = BigNumber.from(
+        Math.max(1, _.sum(routeWithValidQuote.initializedTicksCrossedList))
+      );
 
-    // We have observed that this algorithm tends to underestimate single hop swaps.
-    // We add a buffer in the case of a single hop swap.
-    if (totalHops.eq(1)) {
-      hopsGasUse = hopsGasUse.add(SINGLE_HOP_OVERHEAD(chainId));
+      let hopsGasUse = COST_PER_HOP(chainId).mul(totalHops);
+
+      // We have observed that this algorithm tends to underestimate single hop swaps.
+      // We add a buffer in the case of a single hop swap.
+      if (totalHops.eq(1)) {
+        hopsGasUse = hopsGasUse.add(SINGLE_HOP_OVERHEAD(chainId));
+      }
+
+      // Some tokens have extremely expensive transferFrom functions, which causes
+      // us to underestimate them by a large amount. For known tokens, we apply an
+      // adjustment.
+      const tokenOverhead = TOKEN_OVERHEAD(chainId, routeWithValidQuote.route);
+
+      const tickGasUse = COST_PER_INIT_TICK(chainId).mul(
+        totalInitializedTicksCrossed
+      );
+      const uninitializedTickGasUse = COST_PER_UNINIT_TICK.mul(0);
+
+      // base estimate gas used based on chainId estimates for hops and ticks gas useage
+      const baseGasUse = BASE_SWAP_COST(chainId)
+        .add(hopsGasUse)
+        .add(tokenOverhead)
+        .add(tickGasUse)
+        .add(uninitializedTickGasUse)
+        .add(providerConfig?.additionalGasOverhead ?? BigNumber.from(0));
+
+      const baseGasCostWei = gasPriceWei.mul(baseGasUse);
+
+      const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
+
+      const totalGasCostNativeCurrency = CurrencyAmount.fromRawAmount(
+        wrappedCurrency,
+        baseGasCostWei.toString()
+      );
+
+      return {
+        totalGasCostNativeCurrency,
+        totalInitializedTicksCrossed,
+        baseGasUse,
+      };
+    } else if (routeWithValidQuote instanceof StableRouteWithValidQuote) {
+      let hopsGasUse = COST_PER_HOP_STABLE(chainId).mul(totalHops);
+
+      // We have observed that this algorithm tends to underestimate single hop swaps.
+      // We add a buffer in the case of a single hop swap.
+      if (totalHops.eq(1)) {
+        hopsGasUse = hopsGasUse.add(SINGLE_HOP_OVERHEAD_STABLE(chainId));
+      }
+
+      // Some tokens have extremely expensive transferFrom functions, which causes
+      // us to underestimate them by a large amount. For known tokens, we apply an
+      // adjustment.
+      const tokenOverhead = TOKEN_OVERHEAD_STABLE(
+        chainId,
+        routeWithValidQuote.route
+      );
+
+      // base estimate gas used based on chainId estimates for hops and ticks gas useage
+      const baseGasUse = BASE_SWAP_COST_STABLE(chainId)
+        .add(hopsGasUse)
+        .add(tokenOverhead)
+        .add(providerConfig?.additionalGasOverhead ?? BigNumber.from(0));
+
+      const baseGasCostWei = gasPriceWei.mul(baseGasUse);
+
+      const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
+
+      const totalGasCostNativeCurrency = CurrencyAmount.fromRawAmount(
+        wrappedCurrency,
+        baseGasCostWei.toString()
+      );
+
+      return {
+        totalGasCostNativeCurrency,
+        baseGasUse,
+      };
+    } else if (
+      routeWithValidQuote instanceof StableWrapperRouteWithValidQuote
+    ) {
+      let hopsGasUse = COST_PER_HOP_STABLE_WRAPPER(chainId).mul(totalHops);
+
+      // We have observed that this algorithm tends to underestimate single hop swaps.
+      // We add a buffer in the case of a single hop swap.
+      if (totalHops.eq(1)) {
+        hopsGasUse = hopsGasUse.add(
+          SINGLE_HOP_OVERHEAD_STABLE_WRAPPER(chainId)
+        );
+      }
+
+      // base estimate gas used based on chainId estimates for hops and ticks gas useage
+      const baseGasUse = BASE_SWAP_COST_STABLE_WRAPPER(chainId)
+        .add(hopsGasUse)
+        .add(providerConfig?.additionalGasOverhead ?? BigNumber.from(0));
+
+      const baseGasCostWei = gasPriceWei.mul(baseGasUse);
+
+      const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
+
+      const totalGasCostNativeCurrency = CurrencyAmount.fromRawAmount(
+        wrappedCurrency,
+        baseGasCostWei.toString()
+      );
+
+      return {
+        totalGasCostNativeCurrency,
+        baseGasUse,
+      };
     }
 
-    // Some tokens have extremely expensive transferFrom functions, which causes
-    // us to underestimate them by a large amount. For known tokens, we apply an
-    // adjustment.
-    const tokenOverhead = TOKEN_OVERHEAD(chainId, routeWithValidQuote.route);
+    throw new Error('Invalid route type');
+  }
 
-    const tickGasUse = COST_PER_INIT_TICK(chainId).mul(
-      totalInitializedTicksCrossed
-    );
-    const uninitializedTickGasUse = COST_PER_UNINIT_TICK.mul(0);
+  /**
+   * To avoid having a call to optimism's L1 security fee contract for every route and amount combination,
+   * we replicate the gas cost accounting here.
+   */
+  private calculateOptimismToL1SecurityFee(
+    routes: BaseRouteWithValidQuote[],
+    swapConfig: SwapOptionsUniversalRouter,
+    gasData: OptimismGasData,
+    chainId: ChainId
+  ): [BigNumber, BigNumber] {
+    const { l1BaseFee, scalar, decimals, overhead } = gasData;
 
-    // base estimate gas used based on chainId estimates for hops and ticks gas useage
-    const baseGasUse = BASE_SWAP_COST(chainId)
-      .add(hopsGasUse)
-      .add(tokenOverhead)
-      .add(tickGasUse)
-      .add(uninitializedTickGasUse)
-      .add(providerConfig?.additionalGasOverhead ?? BigNumber.from(0));
+    const route: BaseRouteWithValidQuote = routes[0]!;
+    const amountToken =
+      route.tradeType == TradeType.EXACT_INPUT
+        ? route.amount.currency
+        : route.quote.currency;
+    const outputToken =
+      route.tradeType == TradeType.EXACT_INPUT
+        ? route.quote.currency
+        : route.amount.currency;
 
-    const baseGasCostWei = gasPriceWei.mul(baseGasUse);
+    // build trade for swap calldata
+    const trade = buildTrade(amountToken, outputToken, route.tradeType, routes);
+    const data = buildSwapMethodParameters(
+      trade,
+      swapConfig,
+      ChainId.OPTIMISM
+    ).calldata;
+    const l1GasUsed = getL2ToL1GasUsed(data, overhead, chainId);
+    // l1BaseFee is L1 Gas Price on etherscan
+    const l1Fee = l1GasUsed.mul(l1BaseFee);
+    const unscaled = l1Fee.mul(scalar);
+    // scaled = unscaled / (10 ** decimals)
+    const scaledConversion = BigNumber.from(10).pow(decimals);
+    const scaled = unscaled.div(scaledConversion);
+    // TODO: also return the gasUsedL1OnL2 because the final estimateGasUsed should include L1 calldata posting fee
+    return [l1GasUsed, scaled];
+  }
 
-    const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
+  private calculateArbitrumToL1SecurityFee(
+    routes: BaseRouteWithValidQuote[],
+    swapConfig: SwapOptionsUniversalRouter,
+    gasData: ArbitrumGasData,
+    chainId: ChainId
+  ): [BigNumber, BigNumber, BigNumber] {
+    const route: BaseRouteWithValidQuote = routes[0]!;
 
-    const totalGasCostNativeCurrency = CurrencyAmount.fromRawAmount(
-      wrappedCurrency,
-      baseGasCostWei.toString()
-    );
+    const amountToken =
+      route.tradeType == TradeType.EXACT_INPUT
+        ? route.amount.currency
+        : route.quote.currency;
+    const outputToken =
+      route.tradeType == TradeType.EXACT_INPUT
+        ? route.quote.currency
+        : route.amount.currency;
 
-    return {
-      totalGasCostNativeCurrency,
-      totalInitializedTicksCrossed,
-      baseGasUse,
-    };
+    // build trade for swap calldata
+    const trade = buildTrade(amountToken, outputToken, route.tradeType, routes);
+    const data = buildSwapMethodParameters(
+      trade,
+      swapConfig,
+      ChainId.ARBITRUM_ONE
+    ).calldata;
+    return calculateArbitrumToL1FeeFromCalldata(data, gasData, chainId);
   }
 }

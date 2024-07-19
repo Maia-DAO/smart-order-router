@@ -4,36 +4,59 @@ import {
   MixedRouteSDK,
   Protocol,
   Trade,
-} from '@uniswap/router-sdk';
+} from 'hermes-swap-router-sdk';
+import { SwapOptions as UniversalRouterSwapOptions } from 'hermes-universal-router-sdk';
+import {
+  ComposableStablePool,
+  ComposableStablePoolWrapper,
+  Pool,
+  Position,
+  TradeType,
+  V2RouteSDK as V2RouteRaw,
+  Route as V3RouteRaw,
+} from 'hermes-v2-sdk';
 import {
   Currency,
   Fraction,
+  NativeToken,
   Percent,
-  Token,
-  TradeType,
-} from '@uniswap/sdk-core';
-import { SwapOptions as UniversalRouterSwapOptions } from '@uniswap/universal-router-sdk';
-import { Route as V2RouteRaw } from '@uniswap/v2-sdk';
-import {
   MethodParameters as SDKMethodParameters,
-  Pool,
-  Position,
-  Route as V3RouteRaw,
-} from '@uniswap/v3-sdk';
+} from 'maia-core-sdk';
 
 import { SimulationStatus } from '../providers';
 import { CurrencyAmount } from '../util/amounts';
 
 import { RouteWithValidQuote } from './alpha-router';
 
-export class V3Route extends V3RouteRaw<Token, Token> {
+export type AllRoutes =
+  | V3Route
+  | V2Route
+  | MixedRoute
+  | StableRoute
+  | StableWrapperRoute;
+
+export class V3Route extends V3RouteRaw<Pool, NativeToken, NativeToken> {
   protocol: Protocol.V3 = Protocol.V3;
 }
-export class V2Route extends V2RouteRaw<Token, Token> {
+export class V2Route extends V2RouteRaw<NativeToken, NativeToken> {
   protocol: Protocol.V2 = Protocol.V2;
 }
-export class MixedRoute extends MixedRouteSDK<Token, Token> {
+export class MixedRoute extends MixedRouteSDK<NativeToken, NativeToken> {
   protocol: Protocol.MIXED = Protocol.MIXED;
+}
+export class StableRoute extends V3RouteRaw<
+  ComposableStablePool,
+  NativeToken,
+  NativeToken
+> {
+  protocol: Protocol.BAL_STABLE = Protocol.BAL_STABLE;
+}
+export class StableWrapperRoute extends V3RouteRaw<
+  ComposableStablePoolWrapper,
+  NativeToken,
+  NativeToken
+> {
+  protocol: Protocol.BAL_STABLE_WRAPPER = Protocol.BAL_STABLE_WRAPPER;
 }
 
 export type SwapRoute = {
@@ -75,7 +98,7 @@ export type SwapRoute = {
    * will be undefined if no gas token is specified in the AlphaRouter config
    */
   estimatedGasUsedGasToken?: CurrencyAmount;
-  /*
+  /**
    * The gas price used when computing quoteGasAdjusted, estimatedGasUsedQuoteToken, etc.
    */
   gasPriceWei: BigNumber;

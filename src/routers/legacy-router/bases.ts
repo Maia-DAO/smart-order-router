@@ -1,29 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ChainId, Token } from '@uniswap/sdk-core';
+
+import { ChainId, NativeToken } from 'maia-core-sdk';
 
 import {
-  BTC_BNB,
-  BUSD_BNB,
-  DAI_AVAX,
-  DAI_BNB,
   DAI_MAINNET,
   ITokenProvider,
-  USDB_BLAST,
-  USDC_AVAX,
-  USDC_BASE,
-  USDC_BNB,
   USDC_MAINNET,
-  USDC_ZKSYNC, USDCE_ZKSYNC,
-  USDT_BNB,
   USDT_MAINNET,
   WBTC_MAINNET,
-  WMATIC_POLYGON,
-  WMATIC_POLYGON_MUMBAI
 } from '../../providers/token-provider';
 import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 
 type ChainTokenList = {
-  readonly [chainId in ChainId]: Token[];
+  readonly [chainId in ChainId]: NativeToken[];
 };
 
 export const BASES_TO_CHECK_TRADES_AGAINST = (
@@ -37,48 +26,9 @@ export const BASES_TO_CHECK_TRADES_AGAINST = (
       USDT_MAINNET,
       WBTC_MAINNET,
     ],
-    [ChainId.GOERLI]: [WRAPPED_NATIVE_CURRENCY[ChainId.GOERLI]!],
     [ChainId.SEPOLIA]: [WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!],
-    [ChainId.OPTIMISM]: [WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM]!],
-    [ChainId.OPTIMISM_GOERLI]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM_GOERLI]!,
-    ],
-    [ChainId.OPTIMISM_SEPOLIA]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM_SEPOLIA]!,
-    ],
     [ChainId.ARBITRUM_ONE]: [WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!],
-    [ChainId.ARBITRUM_GOERLI]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_GOERLI]!,
-    ],
-    [ChainId.ARBITRUM_SEPOLIA]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_SEPOLIA]!,
-    ],
-    [ChainId.POLYGON]: [WMATIC_POLYGON],
-    [ChainId.POLYGON_MUMBAI]: [WMATIC_POLYGON_MUMBAI],
-    [ChainId.CELO]: [WRAPPED_NATIVE_CURRENCY[ChainId.CELO]],
-    [ChainId.CELO_ALFAJORES]: [WRAPPED_NATIVE_CURRENCY[ChainId.CELO_ALFAJORES]],
-    [ChainId.GNOSIS]: [WRAPPED_NATIVE_CURRENCY[ChainId.GNOSIS]],
-    [ChainId.MOONBEAM]: [WRAPPED_NATIVE_CURRENCY[ChainId.MOONBEAM]],
-    [ChainId.BNB]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.BNB]!,
-      BUSD_BNB,
-      DAI_BNB,
-      USDC_BNB,
-      USDT_BNB,
-      BTC_BNB,
-    ],
-    [ChainId.AVALANCHE]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.AVALANCHE]!,
-      USDC_AVAX,
-      DAI_AVAX,
-    ],
-    [ChainId.BASE]: [WRAPPED_NATIVE_CURRENCY[ChainId.BASE]!, USDC_BASE],
-    [ChainId.BASE_GOERLI]: [WRAPPED_NATIVE_CURRENCY[ChainId.BASE_GOERLI]!],
-    [ChainId.ZORA]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZORA]!],
-    [ChainId.ZORA_SEPOLIA]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZORA_SEPOLIA]!],
-    [ChainId.ROOTSTOCK]: [WRAPPED_NATIVE_CURRENCY[ChainId.ROOTSTOCK]!],
-    [ChainId.BLAST]: [WRAPPED_NATIVE_CURRENCY[ChainId.BLAST]!, USDB_BLAST],
-    [ChainId.ZKSYNC]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZKSYNC]!, USDCE_ZKSYNC, USDC_ZKSYNC],
+    [ChainId.OPTIMISM]: [WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM]!],
   };
 };
 
@@ -87,9 +37,10 @@ const getBasePairByAddress = async (
   _chainId: ChainId,
   fromAddress: string,
   toAddress: string
-): Promise<{ [tokenAddress: string]: Token[] }> => {
+): Promise<{ [tokenAddress: string]: NativeToken[] }> => {
   const accessor = await tokenProvider.getTokens([toAddress]);
-  const toToken: Token | undefined = accessor.getTokenByAddress(toAddress);
+  const toToken: NativeToken | undefined =
+    accessor.getTokenByAddress(toAddress);
 
   if (!toToken) return {};
 
@@ -101,7 +52,7 @@ const getBasePairByAddress = async (
 export const ADDITIONAL_BASES = async (
   tokenProvider: ITokenProvider
 ): Promise<{
-  [chainId in ChainId]?: { [tokenAddress: string]: Token[] };
+  [chainId in ChainId]?: { [tokenAddress: string]: NativeToken[] };
 }> => {
   return {
     [ChainId.MAINNET]: {
@@ -164,7 +115,7 @@ export const ADDITIONAL_BASES = async (
 export const CUSTOM_BASES = async (
   tokenProvider: ITokenProvider
 ): Promise<{
-  [chainId in ChainId]?: { [tokenAddress: string]: Token[] };
+  [chainId in ChainId]?: { [tokenAddress: string]: NativeToken[] };
 }> => {
   return {
     [ChainId.MAINNET]: {

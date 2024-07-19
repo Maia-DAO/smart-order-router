@@ -1,118 +1,23 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
+import { Pair } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
-import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 import { log } from '../../util/log';
-import {
-  ARB_ARBITRUM,
-  BTC_BNB,
-  BUSD_BNB,
-  CELO,
-  CEUR_CELO,
-  CUSD_CELO,
-  DAI_ARBITRUM,
-  DAI_AVAX,
-  DAI_BNB,
-  DAI_CELO,
-  DAI_MAINNET,
-  DAI_MOONBEAM,
-  DAI_OPTIMISM,
-  ETH_BNB,
-  OP_OPTIMISM,
-  USDB_BLAST,
-  USDC_ARBITRUM,
-  USDC_AVAX,
-  USDC_BASE,
-  USDC_BNB,
-  USDC_MAINNET,
-  USDC_MOONBEAM,
-  USDC_NATIVE_ARBITRUM,
-  USDC_OPTIMISM,
-  USDC_POLYGON,
-  USDC_ZKSYNC, USDCE_ZKSYNC,
-  USDT_ARBITRUM,
-  USDT_BNB,
-  USDT_MAINNET,
-  USDT_OPTIMISM,
-  WBTC_ARBITRUM,
-  WBTC_MAINNET,
-  WBTC_MOONBEAM,
-  WBTC_OPTIMISM,
-  WETH_POLYGON,
-  WMATIC_POLYGON
-} from '../token-provider';
 
 import { IV2SubgraphProvider, V2SubgraphPool } from './subgraph-provider';
 
 type ChainTokenList = {
-  readonly [chainId in ChainId]: Token[];
+  readonly [chainId in ChainId]: NativeToken[];
 };
 
 const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
-  [ChainId.MAINNET]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET]!,
-    DAI_MAINNET,
-    USDC_MAINNET,
-    USDT_MAINNET,
-    WBTC_MAINNET,
-  ],
-  [ChainId.GOERLI]: [WRAPPED_NATIVE_CURRENCY[ChainId.GOERLI]!],
-  [ChainId.SEPOLIA]: [WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!],
-  //v2 not deployed on [arbitrum, polygon, celo, gnosis, moonbeam, bnb, avalanche] and their testnets
-  [ChainId.OPTIMISM]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM]!,
-    USDC_OPTIMISM,
-    DAI_OPTIMISM,
-    USDT_OPTIMISM,
-    WBTC_OPTIMISM,
-    OP_OPTIMISM,
-  ],
-  [ChainId.ARBITRUM_ONE]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!,
-    WBTC_ARBITRUM,
-    DAI_ARBITRUM,
-    USDC_ARBITRUM,
-    USDC_NATIVE_ARBITRUM,
-    USDT_ARBITRUM,
-    ARB_ARBITRUM,
-  ],
-  [ChainId.ARBITRUM_GOERLI]: [],
-  [ChainId.ARBITRUM_SEPOLIA]: [],
-  [ChainId.OPTIMISM_GOERLI]: [],
-  [ChainId.OPTIMISM_SEPOLIA]: [],
-  [ChainId.POLYGON]: [USDC_POLYGON, WETH_POLYGON, WMATIC_POLYGON],
-  [ChainId.POLYGON_MUMBAI]: [],
-  [ChainId.CELO]: [CELO, CUSD_CELO, CEUR_CELO, DAI_CELO],
-  [ChainId.CELO_ALFAJORES]: [],
-  [ChainId.GNOSIS]: [],
-  [ChainId.MOONBEAM]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.MOONBEAM],
-    DAI_MOONBEAM,
-    USDC_MOONBEAM,
-    WBTC_MOONBEAM,
-  ],
-  [ChainId.BNB]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.BNB],
-    BUSD_BNB,
-    DAI_BNB,
-    USDC_BNB,
-    USDT_BNB,
-    BTC_BNB,
-    ETH_BNB,
-  ],
-  [ChainId.AVALANCHE]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.AVALANCHE],
-    USDC_AVAX,
-    DAI_AVAX,
-  ],
-  [ChainId.BASE_GOERLI]: [],
-  [ChainId.BASE]: [WRAPPED_NATIVE_CURRENCY[ChainId.BASE], USDC_BASE],
-  [ChainId.ZORA]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZORA]!],
-  [ChainId.ZORA_SEPOLIA]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZORA_SEPOLIA]!],
-  [ChainId.ROOTSTOCK]: [WRAPPED_NATIVE_CURRENCY[ChainId.ROOTSTOCK]!],
-  [ChainId.BLAST]: [WRAPPED_NATIVE_CURRENCY[ChainId.BLAST]!, USDB_BLAST],
-  [ChainId.ZKSYNC]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZKSYNC]!, USDCE_ZKSYNC, USDC_ZKSYNC],
+  // v2 is not being used, even in chains where it is deployed
+  [ChainId.MAINNET]: [],
+  [ChainId.SEPOLIA]: [],
+  //v2 not deployed on [optimism, arbitrum, polygon, celo, gnosis, moonbeam, bnb, avalanche] and their testnets
+  [ChainId.OPTIMISM]: [],
+  [ChainId.ARBITRUM_ONE]: [],
 };
 
 /**
@@ -131,27 +36,28 @@ export class StaticV2SubgraphProvider implements IV2SubgraphProvider {
   constructor(private chainId: ChainId) {}
 
   public async getPools(
-    tokenIn?: Token,
-    tokenOut?: Token
+    tokenIn?: NativeToken,
+    tokenOut?: NativeToken
   ): Promise<V2SubgraphPool[]> {
     log.info('In static subgraph provider for V2');
     const bases = BASES_TO_CHECK_TRADES_AGAINST[this.chainId];
 
-    const basePairs: [Token, Token][] = _.flatMap(
+    const basePairs: [NativeToken, NativeToken][] = _.flatMap(
       bases,
-      (base): [Token, Token][] => bases.map((otherBase) => [base, otherBase])
+      (base): [NativeToken, NativeToken][] =>
+        bases.map((otherBase) => [base, otherBase])
     );
 
     if (tokenIn && tokenOut) {
       basePairs.push(
         [tokenIn, tokenOut],
-        ...bases.map((base): [Token, Token] => [tokenIn, base]),
-        ...bases.map((base): [Token, Token] => [tokenOut, base])
+        ...bases.map((base): [NativeToken, NativeToken] => [tokenIn, base]),
+        ...bases.map((base): [NativeToken, NativeToken] => [tokenOut, base])
       );
     }
 
-    const pairs: [Token, Token][] = _(basePairs)
-      .filter((tokens): tokens is [Token, Token] =>
+    const pairs: [NativeToken, NativeToken][] = _(basePairs)
+      .filter((tokens): tokens is [NativeToken, NativeToken] =>
         Boolean(tokens[0] && tokens[1])
       )
       .filter(

@@ -1,8 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ChainId, Token } from '@uniswap/sdk-core';
-import { computePoolAddress, FeeAmount, Pool } from '@uniswap/v3-sdk';
 import retry, { Options as RetryOptions } from 'async-retry';
+import { computePoolAddress, FeeAmount, Pool } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, NativeToken } from 'maia-core-sdk';
 
 import { IUniswapV3PoolState__factory } from '../../types/v3/factories/IUniswapV3PoolState__factory';
 import { V3_CORE_FACTORY_ADDRESSES } from '../../util/addresses';
@@ -38,29 +38,29 @@ export interface IV3PoolProvider {
    * @returns A pool accessor with methods for accessing the pools.
    */
   getPools(
-    tokenPairs: [Token, Token, FeeAmount][],
+    tokenPairs: [NativeToken, NativeToken, FeeAmount][],
     providerConfig?: ProviderConfig
   ): Promise<V3PoolAccessor>;
 
   /**
    * Gets the pool address for the specified token pair and fee tier.
    *
-   * @param tokenA Token A in the pool.
-   * @param tokenB Token B in the pool.
+   * @param tokenA NativeToken A in the pool.
+   * @param tokenB NativeToken B in the pool.
    * @param feeAmount The fee amount of the pool.
    * @returns The pool address and the two tokens.
    */
   getPoolAddress(
-    tokenA: Token,
-    tokenB: Token,
+    tokenA: NativeToken,
+    tokenB: NativeToken,
     feeAmount: FeeAmount
-  ): { poolAddress: string; token0: Token; token1: Token };
+  ): { poolAddress: string; token0: NativeToken; token1: NativeToken };
 }
 
 export type V3PoolAccessor = {
   getPool: (
-    tokenA: Token,
-    tokenB: Token,
+    tokenA: NativeToken,
+    tokenB: NativeToken,
     feeAmount: FeeAmount
   ) => Pool | undefined;
   getPoolByAddress: (address: string) => Pool | undefined;
@@ -91,11 +91,11 @@ export class V3PoolProvider implements IV3PoolProvider {
   ) {}
 
   public async getPools(
-    tokenPairs: [Token, Token, FeeAmount][],
+    tokenPairs: [NativeToken, NativeToken, FeeAmount][],
     providerConfig?: ProviderConfig
   ): Promise<V3PoolAccessor> {
     const poolAddressSet: Set<string> = new Set<string>();
-    const sortedTokenPairs: Array<[Token, Token, FeeAmount]> = [];
+    const sortedTokenPairs: Array<[NativeToken, NativeToken, FeeAmount]> = [];
     const sortedPoolAddresses: string[] = [];
 
     for (const tokenPair of tokenPairs) {
@@ -139,7 +139,7 @@ export class V3PoolProvider implements IV3PoolProvider {
 
     const poolAddressToPool: { [poolAddress: string]: Pool } = {};
 
-    const invalidPools: [Token, Token, FeeAmount][] = [];
+    const invalidPools: [NativeToken, NativeToken, FeeAmount][] = [];
 
     for (let i = 0; i < sortedPoolAddresses.length; i++) {
       const slot0Result = slot0Results[i];
@@ -194,8 +194,8 @@ export class V3PoolProvider implements IV3PoolProvider {
 
     return {
       getPool: (
-        tokenA: Token,
-        tokenB: Token,
+        tokenA: NativeToken,
+        tokenB: NativeToken,
         feeAmount: FeeAmount
       ): Pool | undefined => {
         const { poolAddress } = this.getPoolAddress(tokenA, tokenB, feeAmount);
@@ -208,10 +208,10 @@ export class V3PoolProvider implements IV3PoolProvider {
   }
 
   public getPoolAddress(
-    tokenA: Token,
-    tokenB: Token,
+    tokenA: NativeToken,
+    tokenB: NativeToken,
     feeAmount: FeeAmount
-  ): { poolAddress: string; token0: Token; token1: Token } {
+  ): { poolAddress: string; token0: NativeToken; token1: NativeToken } {
     const [token0, token1] = tokenA.sortsBefore(tokenB)
       ? [tokenA, tokenB]
       : [tokenB, tokenA];
@@ -229,8 +229,6 @@ export class V3PoolProvider implements IV3PoolProvider {
       tokenA: token0,
       tokenB: token1,
       fee: feeAmount,
-      initCodeHashManualOverride: undefined,
-      chainId: this.chainId,
     });
 
     this.POOL_ADDRESS_CACHE[cacheKey] = poolAddress;

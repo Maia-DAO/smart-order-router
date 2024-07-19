@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ChainId, Token } from '@uniswap/sdk-core';
 import { TokenInfo, TokenList } from '@uniswap/token-lists';
 import axios from 'axios';
+import { NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
 import { log } from '../util/log';
 import { metric, MetricLoggerUnit } from '../util/metric';
@@ -10,7 +11,7 @@ import { ICache } from './cache';
 import { ITokenProvider, TokenAccessor } from './token-provider';
 
 /**
- * Provider for getting token data from a Token List.
+ * Provider for getting token data from a NativeToken List.
  *
  * @export
  * @interface ITokenListProvider
@@ -18,11 +19,11 @@ import { ITokenProvider, TokenAccessor } from './token-provider';
 export interface ITokenListProvider {
   hasTokenBySymbol(_symbol: string): Promise<boolean>;
 
-  getTokenBySymbol(_symbol: string): Promise<Token | undefined>;
+  getTokenBySymbol(_symbol: string): Promise<NativeToken | undefined>;
 
   hasTokenByAddress(address: string): Promise<boolean>;
 
-  getTokenByAddress(address: string): Promise<Token | undefined>;
+  getTokenByAddress(address: string): Promise<NativeToken | undefined>;
 }
 
 export class CachingTokenListProvider
@@ -48,7 +49,7 @@ export class CachingTokenListProvider
 
   /**
    * Creates an instance of CachingTokenListProvider.
-   * Token metadata (e.g. symbol and decimals) generally don't change so can be cached indefinitely.
+   * NativeToken metadata (e.g. symbol and decimals) generally don't change so can be cached indefinitely.
    *
    * @param chainId The chain id to use.
    * @param tokenList The token list to get the tokens from.
@@ -57,7 +58,7 @@ export class CachingTokenListProvider
   constructor(
     chainId: ChainId | number,
     tokenList: TokenList,
-    private tokenCache: ICache<Token>
+    private tokenCache: ICache<NativeToken>
   ) {
     this.chainId = chainId;
     this.tokenList = tokenList;
@@ -91,7 +92,7 @@ export class CachingTokenListProvider
   public static async fromTokenListURI(
     chainId: ChainId | number,
     tokenListURI: string,
-    tokenCache: ICache<Token>
+    tokenCache: ICache<NativeToken>
   ) {
     const now = Date.now();
     const tokenList = await this.buildTokenList(tokenListURI);
@@ -129,7 +130,7 @@ export class CachingTokenListProvider
   public static async fromTokenList(
     chainId: ChainId | number,
     tokenList: TokenList,
-    tokenCache: ICache<Token>
+    tokenCache: ICache<NativeToken>
   ) {
     const now = Date.now();
 
@@ -156,10 +157,10 @@ export class CachingTokenListProvider
    * @returns Promise<TokenAccessor> A token accessor with methods for accessing the tokens.
    */
   public async getTokens(_addresses?: string[]): Promise<TokenAccessor> {
-    const addressToToken: Map<string, Token> = new Map();
-    const symbolToToken: Map<string, Token> = new Map();
+    const addressToToken: Map<string, NativeToken> = new Map();
+    const symbolToToken: Map<string, NativeToken> = new Map();
 
-    const addToken = (token?: Token) => {
+    const addToken = (token?: NativeToken) => {
       if (!token) return;
       addressToToken.set(token.address.toLowerCase(), token);
       if (token.symbol !== undefined) {
@@ -186,7 +187,7 @@ export class CachingTokenListProvider
         addressToToken.get(address.toLowerCase()),
       getTokenBySymbol: (symbol: string) =>
         symbolToToken.get(symbol.toLowerCase()),
-      getAllTokens: (): Token[] => {
+      getAllTokens: (): NativeToken[] => {
         return Array.from(addressToToken.values());
       },
     };
@@ -198,10 +199,12 @@ export class CachingTokenListProvider
     );
   }
 
-  public async getTokenBySymbol(_symbol: string): Promise<Token | undefined> {
+  public async getTokenBySymbol(
+    _symbol: string
+  ): Promise<NativeToken | undefined> {
     let symbol = _symbol;
 
-    // We consider ETH as a regular ERC20 Token throughout this package. We don't use the NativeCurrency object from the sdk.
+    // We consider ETH as a regular ERC20 NativeToken throughout this package. We don't use the NativeCurrency object from the sdk.
     // When we build the calldata for swapping we insert wrapping/unwrapping as needed.
     if (_symbol == 'ETH') {
       symbol = 'WETH';
@@ -215,7 +218,7 @@ export class CachingTokenListProvider
       return undefined;
     }
 
-    const token: Token = await this.buildToken(tokenInfo);
+    const token: NativeToken = await this.buildToken(tokenInfo);
 
     return token;
   }
@@ -226,7 +229,9 @@ export class CachingTokenListProvider
     );
   }
 
-  public async getTokenByAddress(address: string): Promise<Token | undefined> {
+  public async getTokenByAddress(
+    address: string
+  ): Promise<NativeToken | undefined> {
     const tokenInfo = this.chainAddressToTokenInfo.get(
       this.CHAIN_ADDRESS_KEY(this.chainId, address)
     );
@@ -235,12 +240,12 @@ export class CachingTokenListProvider
       return undefined;
     }
 
-    const token: Token = await this.buildToken(tokenInfo);
+    const token: NativeToken = await this.buildToken(tokenInfo);
 
     return token;
   }
 
-  private async buildToken(tokenInfo: TokenInfo): Promise<Token> {
+  private async buildToken(tokenInfo: TokenInfo): Promise<NativeToken> {
     const cacheKey = this.CACHE_KEY(tokenInfo);
     const cachedToken = await this.tokenCache.get(cacheKey);
 
@@ -248,7 +253,7 @@ export class CachingTokenListProvider
       return cachedToken;
     }
 
-    const token = new Token(
+    const token = new NativeToken(
       this.chainId,
       tokenInfo.address,
       tokenInfo.decimals,

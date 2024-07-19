@@ -1,13 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { ChainId } from '@uniswap/sdk-core';
+import { ChainId } from 'maia-core-sdk';
 
-import {
-  GasModelProviderConfig,
-  SwapOptions,
-  SwapRoute,
-  SwapType,
-} from '../routers';
+import { SwapOptions, SwapRoute, SwapType } from '../routers';
 import { BEACON_CHAIN_DEPOSIT_ADDRESS, log } from '../util';
 import {
   calculateGasUsed,
@@ -18,6 +13,7 @@ import { IPortionProvider } from './portion-provider';
 import { ProviderConfig } from './provider';
 import { SimulationStatus, Simulator } from './simulation-provider';
 import { IV2PoolProvider } from './v2/pool-provider';
+import { ArbitrumGasData, OptimismGasData } from './v3/gas-data-provider';
 import { IV3PoolProvider } from './v3/pool-provider';
 
 // We multiply eth estimate gas by this to add a buffer for gas limits
@@ -46,6 +42,7 @@ export class EthEstimateGasSimulator extends Simulator {
     fromAddress: string,
     swapOptions: SwapOptions,
     route: SwapRoute,
+    l2GasData?: ArbitrumGasData | OptimismGasData,
     providerConfig?: ProviderConfig
   ): Promise<SwapRoute> {
     const currencyIn = route.trade.inputAmount.currency;
@@ -112,7 +109,15 @@ export class EthEstimateGasSimulator extends Simulator {
       estimatedGasUsedQuoteToken,
       estimatedGasUsedGasToken,
       quoteGasAdjusted,
-    } = await calculateGasUsed(route.quote.currency.chainId, route, estimatedGasUsed, this.v2PoolProvider, this.v3PoolProvider, this.provider, providerConfig);
+    } = await calculateGasUsed(
+      route.quote.currency.chainId,
+      route,
+      estimatedGasUsed,
+      this.v2PoolProvider,
+      this.v3PoolProvider,
+      l2GasData,
+      providerConfig
+    );
     return {
       ...initSwapRouteFromExisting(
         route,
@@ -146,7 +151,9 @@ export class EthEstimateGasSimulator extends Simulator {
     fromAddress: string,
     swapOptions: SwapOptions,
     swapRoute: SwapRoute,
-    _providerConfig?: GasModelProviderConfig
+    l2GasData?: OptimismGasData | ArbitrumGasData | undefined,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _providerConfig?: ProviderConfig | undefined
   ): Promise<SwapRoute> {
     const inputAmount = swapRoute.trade.inputAmount;
     if (
@@ -158,7 +165,12 @@ export class EthEstimateGasSimulator extends Simulator {
         this.provider
       ))
     ) {
-      return await this.ethEstimateGas(fromAddress, swapOptions, swapRoute, _providerConfig);
+      return await this.ethEstimateGas(
+        fromAddress,
+        swapOptions,
+        swapRoute,
+        l2GasData
+      );
     } else {
       log.info('Token not approved, skipping simulation');
       return {

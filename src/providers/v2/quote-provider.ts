@@ -1,9 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { TradeType } from '@uniswap/sdk-core';
 import {
   InsufficientInputAmountError,
   InsufficientReservesError,
-} from '@uniswap/v2-sdk';
+  TradeType,
+} from 'hermes-v2-sdk';
 
 import { V2Route } from '../../routers/router';
 import { CurrencyAmount } from '../../util/amounts';
@@ -76,7 +76,7 @@ export class V2QuoteProvider implements IV2QuoteProvider {
     amounts: CurrencyAmount[],
     routes: V2Route[],
     tradeType: TradeType,
-    providerConfig: ProviderConfig
+    _providerConfig: ProviderConfig
   ): Promise<{ routesWithQuotes: V2RouteWithQuotes[] }> {
     const routesWithQuotes: V2RouteWithQuotes[] = [];
 
@@ -93,8 +93,8 @@ export class V2QuoteProvider implements IV2QuoteProvider {
 
             for (const pair of route.pairs) {
               [outputAmount] = pair.getOutputAmount(
-                outputAmount,
-                providerConfig.enableFeeOnTransferFeeFetching === true
+                outputAmount
+                // TODO: Possibly re-add fee providerConfig.enableFeeOnTransferFeeFetching === true
               );
             }
 
@@ -108,8 +108,8 @@ export class V2QuoteProvider implements IV2QuoteProvider {
             for (let i = route.pairs.length - 1; i >= 0; i--) {
               const pair = route.pairs[i]!;
               [inputAmount] = pair.getInputAmount(
-                inputAmount,
-                providerConfig.enableFeeOnTransferFeeFetching === true
+                inputAmount
+                // TODO: Possibly re-add fee providerConfig.enableFeeOnTransferFeeFetching === true
               );
             }
 

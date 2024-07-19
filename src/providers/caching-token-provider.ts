@@ -1,66 +1,32 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
 import _ from 'lodash';
+import { ChainId, NativeToken } from 'maia-core-sdk';
 
 import { log, WRAPPED_NATIVE_CURRENCY } from '../util';
 
 import { ICache } from './cache';
 import {
-  BTC_BNB,
-  BUSD_BNB,
-  CELO,
-  CELO_ALFAJORES,
-  CEUR_CELO,
-  CUSD_CELO,
-  CUSD_CELO_ALFAJORES,
   DAI_ARBITRUM,
-  DAI_ARBITRUM_SEPOLIA,
-  DAI_AVAX,
-  DAI_BNB,
-  DAI_CELO,
-  DAI_CELO_ALFAJORES,
   DAI_MAINNET,
-  DAI_MOONBEAM,
   DAI_OPTIMISM,
-  DAI_OPTIMISM_GOERLI,
-  DAI_OPTIMISM_SEPOLIA,
-  DAI_POLYGON_MUMBAI,
-  ETH_BNB,
+  DAI_SEPOLIA,
   ITokenProvider,
   TokenAccessor,
-  USDB_BLAST,
   USDC_ARBITRUM,
-  USDC_ARBITRUM_GOERLI,
-  USDC_ARBITRUM_SEPOLIA,
-  USDC_AVAX,
-  USDC_BASE,
-  USDC_BNB,
-  USDC_ETHEREUM_GNOSIS,
   USDC_MAINNET,
-  USDC_MOONBEAM,
   USDC_OPTIMISM,
-  USDC_OPTIMISM_GOERLI,
-  USDC_OPTIMISM_SEPOLIA,
-  USDC_POLYGON,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_BNB,
   USDT_MAINNET,
   USDT_OPTIMISM,
-  USDT_OPTIMISM_GOERLI,
-  USDT_OPTIMISM_SEPOLIA,
+  USDT_SEPOLIA,
   WBTC_ARBITRUM,
   WBTC_MAINNET,
-  WBTC_MOONBEAM,
   WBTC_OPTIMISM,
-  WBTC_OPTIMISM_GOERLI,
-  WBTC_OPTIMISM_SEPOLIA,
-  WMATIC_POLYGON,
-  WMATIC_POLYGON_MUMBAI,
 } from './token-provider';
 
-// These tokens will added to the Token cache on initialization.
+// These tokens will added to the NativeToken cache on initialization.
 export const CACHE_SEED_TOKENS: {
-  [chainId in ChainId]?: { [symbol: string]: Token };
+  [chainId in ChainId]?: { [symbol: string]: NativeToken };
 } = {
   [ChainId.MAINNET]: {
     WETH: WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET]!,
@@ -71,7 +37,7 @@ export const CACHE_SEED_TOKENS: {
     // This token stores its symbol as bytes32, therefore can not be fetched on-chain using
     // our token providers.
     // This workaround adds it to the cache, so we won't try to fetch it on-chain.
-    RING: new Token(
+    RING: new NativeToken(
       ChainId.MAINNET,
       '0x9469D013805bFfB7D3DEBe5E7839237e535ec483',
       18,
@@ -80,7 +46,10 @@ export const CACHE_SEED_TOKENS: {
     ),
   },
   [ChainId.SEPOLIA]: {
+    WETH: WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
     USDC: USDC_SEPOLIA,
+    USDT: USDT_SEPOLIA,
+    DAI: DAI_SEPOLIA,
   },
   [ChainId.OPTIMISM]: {
     USDC: USDC_OPTIMISM,
@@ -88,90 +57,12 @@ export const CACHE_SEED_TOKENS: {
     WBTC: WBTC_OPTIMISM,
     DAI: DAI_OPTIMISM,
   },
-  [ChainId.OPTIMISM_GOERLI]: {
-    USDC: USDC_OPTIMISM_GOERLI,
-    USDT: USDT_OPTIMISM_GOERLI,
-    WBTC: WBTC_OPTIMISM_GOERLI,
-    DAI: DAI_OPTIMISM_GOERLI,
-  },
-  [ChainId.OPTIMISM_SEPOLIA]: {
-    USDC: USDC_OPTIMISM_SEPOLIA,
-    USDT: USDT_OPTIMISM_SEPOLIA,
-    WBTC: WBTC_OPTIMISM_SEPOLIA,
-    DAI: DAI_OPTIMISM_SEPOLIA,
-  },
   [ChainId.ARBITRUM_ONE]: {
     USDC: USDC_ARBITRUM,
     USDT: USDT_ARBITRUM,
     WBTC: WBTC_ARBITRUM,
     DAI: DAI_ARBITRUM,
   },
-  [ChainId.ARBITRUM_GOERLI]: {
-    USDC: USDC_ARBITRUM_GOERLI,
-  },
-  [ChainId.ARBITRUM_SEPOLIA]: {
-    USDC: USDC_ARBITRUM_SEPOLIA,
-    DAI: DAI_ARBITRUM_SEPOLIA,
-  },
-  [ChainId.POLYGON]: {
-    WMATIC: WMATIC_POLYGON,
-    USDC: USDC_POLYGON,
-  },
-  [ChainId.POLYGON_MUMBAI]: {
-    WMATIC: WMATIC_POLYGON_MUMBAI,
-    DAI: DAI_POLYGON_MUMBAI,
-  },
-  [ChainId.CELO]: {
-    CELO: CELO,
-    CUSD: CUSD_CELO,
-    CEUR: CEUR_CELO,
-    DAI: DAI_CELO,
-  },
-  [ChainId.CELO_ALFAJORES]: {
-    CELO: CELO_ALFAJORES,
-    CUSD: CUSD_CELO_ALFAJORES,
-    CEUR: CUSD_CELO_ALFAJORES,
-    DAI: DAI_CELO_ALFAJORES,
-  },
-  [ChainId.GNOSIS]: {
-    WXDAI: WRAPPED_NATIVE_CURRENCY[ChainId.GNOSIS],
-    USDC_ETHEREUM_GNOSIS: USDC_ETHEREUM_GNOSIS,
-  },
-  [ChainId.MOONBEAM]: {
-    USDC: USDC_MOONBEAM,
-    DAI: DAI_MOONBEAM,
-    WBTC: WBTC_MOONBEAM,
-    WGLMR: WRAPPED_NATIVE_CURRENCY[ChainId.MOONBEAM],
-  },
-  [ChainId.BNB]: {
-    USDC: USDC_BNB,
-    USDT: USDT_BNB,
-    BUSD: BUSD_BNB,
-    ETH: ETH_BNB,
-    DAI: DAI_BNB,
-    BTC: BTC_BNB,
-    WBNB: WRAPPED_NATIVE_CURRENCY[ChainId.BNB],
-  },
-  [ChainId.AVALANCHE]: {
-    USDC: USDC_AVAX,
-    DAI: DAI_AVAX,
-    WAVAX: WRAPPED_NATIVE_CURRENCY[ChainId.AVALANCHE],
-  },
-  [ChainId.BASE]: {
-    USDC: USDC_BASE,
-    WETH: WRAPPED_NATIVE_CURRENCY[ChainId.BASE],
-  },
-  [ChainId.BLAST]: {
-    USDB: USDB_BLAST,
-    WETH: WRAPPED_NATIVE_CURRENCY[ChainId.BLAST],
-  },
-  [ChainId.ZORA]: {
-    WETH: WRAPPED_NATIVE_CURRENCY[ChainId.ZORA],
-  },
-  [ChainId.ZKSYNC]: {
-    WETH: WRAPPED_NATIVE_CURRENCY[ChainId.ZKSYNC],
-  },
-  // Currently we do not have providers for Moonbeam mainnet or Gnosis testnet
 };
 
 /**
@@ -187,9 +78,9 @@ export class CachingTokenProviderWithFallback implements ITokenProvider {
 
   constructor(
     protected chainId: ChainId,
-    // Token metadata (e.g. symbol and decimals) don't change so can be cached indefinitely.
+    // NativeToken metadata (e.g. symbol and decimals) don't change so can be cached indefinitely.
     // Constructing a new token object is slow as sdk-core does checksumming.
-    private tokenCache: ICache<Token>,
+    private tokenCache: ICache<NativeToken>,
     protected primaryTokenProvider: ITokenProvider,
     protected fallbackTokenProvider?: ITokenProvider
   ) {}
@@ -206,8 +97,8 @@ export class CachingTokenProviderWithFallback implements ITokenProvider {
       }
     }
 
-    const addressToToken: { [address: string]: Token } = {};
-    const symbolToToken: { [symbol: string]: Token } = {};
+    const addressToToken: { [address: string]: NativeToken } = {};
+    const symbolToToken: { [symbol: string]: NativeToken } = {};
 
     const addresses = _(_addresses)
       .map((address) => address.toLowerCase())
@@ -291,14 +182,16 @@ export class CachingTokenProviderWithFallback implements ITokenProvider {
       }
     }
 
+    // TODO: Add another fallback that uses Balancer's subgraph
+
     return {
-      getTokenByAddress: (address: string): Token | undefined => {
+      getTokenByAddress: (address: string): NativeToken | undefined => {
         return addressToToken[address.toLowerCase()];
       },
-      getTokenBySymbol: (symbol: string): Token | undefined => {
+      getTokenBySymbol: (symbol: string): NativeToken | undefined => {
         return symbolToToken[symbol.toLowerCase()];
       },
-      getAllTokens: (): Token[] => {
+      getAllTokens: (): NativeToken[] => {
         return Object.values(addressToToken);
       },
     };

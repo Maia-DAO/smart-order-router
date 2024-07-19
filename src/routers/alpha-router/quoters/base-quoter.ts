@@ -1,10 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
-import { Pool } from '@uniswap/v3-sdk';
+import { Protocol, TPool } from 'hermes-swap-router-sdk';
+import { TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, Currency, NativeToken } from 'maia-core-sdk';
 
+import { AllRoutes } from '../..';
 import {
   ITokenListProvider,
   ITokenProvider,
@@ -18,11 +18,11 @@ import {
   MetricLoggerUnit,
   poolToString,
 } from '../../../util';
-import { MixedRoute, V2Route, V3Route } from '../../router';
 import { AlphaRouterConfig } from '../alpha-router';
 import { RouteWithValidQuote } from '../entities/route-with-valid-quote';
 import {
   CandidatePoolsBySelectionCriteria,
+  StableCandidatePools,
   V2CandidatePools,
   V3CandidatePools,
 } from '../functions/get-candidate-pools';
@@ -39,11 +39,13 @@ import { GetQuotesResult, GetRoutesResult } from './model/results';
  * @template Route
  */
 export abstract class BaseQuoter<
+  // TODO: Add support for multiple pools
   CandidatePools extends
     | V2CandidatePools
     | V3CandidatePools
-    | [V3CandidatePools, V2CandidatePools],
-  Route extends V2Route | V3Route | MixedRoute
+    | StableCandidatePools
+    | [V3CandidatePools, StableCandidatePools],
+  Route extends AllRoutes
 > {
   protected tokenProvider: ITokenProvider;
   protected chainId: ChainId;
@@ -78,8 +80,8 @@ export abstract class BaseQuoter<
    * @returns Promise<GetRoutesResult<Route>>
    */
   protected abstract getRoutes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     candidatePools: CandidatePools,
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig
@@ -103,7 +105,7 @@ export abstract class BaseQuoter<
     routes: Route[],
     amounts: CurrencyAmount[],
     percents: number[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig,
     candidatePools?: CandidatePoolsBySelectionCriteria,
@@ -126,12 +128,12 @@ export abstract class BaseQuoter<
    * @param gasPriceWei instead of passing gasModel, gasPriceWei is used to generate a gasModel
    */
   public getRoutesThenQuotes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     amount: CurrencyAmount,
     amounts: CurrencyAmount[],
     percents: number[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     candidatePools: CandidatePools,
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig,
@@ -183,7 +185,7 @@ export abstract class BaseQuoter<
     });
   }
 
-  protected async applyTokenValidatorToPools<T extends Pool | Pair>(
+  protected async applyTokenValidatorToPools<T extends TPool>(
     pools: T[],
     isInvalidFn: (
       token: Currency,

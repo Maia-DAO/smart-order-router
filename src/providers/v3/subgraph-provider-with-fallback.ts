@@ -1,4 +1,4 @@
-import { Token } from '@uniswap/sdk-core';
+import { NativeToken } from 'maia-core-sdk';
 
 import { log } from '../../util';
 import { ProviderConfig } from '../provider';
@@ -16,8 +16,8 @@ export class V3SubgraphProviderWithFallBacks implements IV3SubgraphProvider {
   constructor(private fallbacks: IV3SubgraphProvider[]) {}
 
   public async getPools(
-    tokenIn?: Token,
-    tokenOut?: Token,
+    tokenIn?: NativeToken,
+    tokenOut?: NativeToken,
     providerConfig?: ProviderConfig
   ): Promise<V3SubgraphPool[]> {
     for (let i = 0; i < this.fallbacks.length; i++) {

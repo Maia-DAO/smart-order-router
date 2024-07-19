@@ -1,11 +1,11 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { ChainId } from '@uniswap/sdk-core';
 import _ from 'lodash';
 import stats from 'stats-lite';
+import { ChainId } from 'maia-core-sdk';
 
-import { UniswapInterfaceMulticall__factory } from '../types/v3/factories/UniswapInterfaceMulticall__factory';
 import { UniswapInterfaceMulticall } from '../types/v3/UniswapInterfaceMulticall';
+import { UniswapInterfaceMulticall__factory } from '../types/v3/factories/UniswapInterfaceMulticall__factory';
 import { UNISWAP_MULTICALL_ADDRESSES } from '../util/addresses';
 import { log } from '../util/log';
 
@@ -191,12 +191,11 @@ export class UniswapMulticallProvider extends IMulticallProvider<UniswapMultical
       if (!success || returnData.length <= 2) {
         log.debug(
           { result: aggregateResults[i] },
-          `Invalid result calling ${functionName} address ${address} with params ${functionParams[i]}`
+          `Invalid result calling ${functionName} with params ${functionParams[i]}`
         );
         results.push({
           success: false,
           returnData,
-          gasUsed,
         });
         continue;
       }

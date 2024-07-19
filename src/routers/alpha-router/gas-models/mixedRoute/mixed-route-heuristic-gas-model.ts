@@ -1,15 +1,16 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { partitionMixedRouteByProtocol } from '@uniswap/router-sdk';
-import { ChainId } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
-import { Pool } from '@uniswap/v3-sdk';
-import JSBI from 'jsbi';
+import { partitionMixedRouteByProtocol, TPool } from 'hermes-swap-router-sdk';
+import {
+  ComposableStablePool,
+  ComposableStablePoolWrapper,
+  Pool,
+} from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId } from 'maia-core-sdk';
 
 import { WRAPPED_NATIVE_CURRENCY } from '../../../..';
 import { log } from '../../../../util';
 import { CurrencyAmount } from '../../../../util/amounts';
-import { getV2NativePool } from '../../../../util/gas-factory-helpers';
 import { MixedRouteWithValidQuote } from '../../entities/route-with-valid-quote';
 import {
   BuildOnChainGasModelFactoryType,
@@ -19,15 +20,19 @@ import {
   IOnChainGasModelFactory,
 } from '../gas-model';
 import {
-  BASE_SWAP_COST as BASE_SWAP_COST_V2,
-  COST_PER_EXTRA_HOP as COST_PER_EXTRA_HOP_V2,
-} from '../v2/v2-heuristic-gas-model';
+  BASE_SWAP_COST as BASE_SWAP_COST_STABLE,
+  COST_PER_HOP as COST_PER_HOP_STABLE,
+} from '../v3/stable-gas-costs';
+import {
+  BASE_SWAP_COST as BASE_SWAP_COST_STABLE_WRAPPER,
+  COST_PER_HOP as COST_PER_HOP_STABLE_WRAPPER,
+} from '../v3/stable-wrapper-gas-costs';
 import {
   BASE_SWAP_COST,
   COST_PER_HOP,
   COST_PER_INIT_TICK,
   COST_PER_UNINIT_TICK,
-} from '../v3/gas-costs';
+} from '../v3/v3-gas-costs';
 
 /**
  * Computes a gas estimate for a mixed route swap using heuristics.
@@ -57,7 +62,6 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory 
     gasPriceWei,
     pools,
     quoteToken,
-    v2poolProvider: V2poolProvider,
     providerConfig,
   }: BuildOnChainGasModelFactoryType): Promise<
     IGasModel<MixedRouteWithValidQuote>
@@ -67,17 +71,6 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory 
     const usdToken = usdPool.token0.equals(nativeCurrency)
       ? usdPool.token1
       : usdPool.token0;
-
-    let nativeV2Pool: Pair | null;
-    // Avoid fetching for a (WETH,WETH) pool here, we handle the quoteToken = wrapped native case in estimateGasCost
-    if (!quoteToken.equals(nativeCurrency) && V2poolProvider) {
-      /// MixedRoutes
-      nativeV2Pool = await getV2NativePool(
-        quoteToken,
-        V2poolProvider,
-        providerConfig
-      );
-    }
 
     const estimateGasCost = (
       routeWithValidQuote: MixedRouteWithValidQuote
@@ -133,7 +126,7 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory 
       // We do this by getting the highest liquidity <quoteToken>/<nativeCurrency> pool. eg. <quoteToken>/ETH pool.
       const nativeV3Pool: Pool | null = pools.nativeAndQuoteTokenV3Pool;
 
-      if (!nativeV3Pool && !nativeV2Pool) {
+      if (!nativeV3Pool) {
         log.info(
           `Unable to find ${nativeCurrency.symbol} pool with the quote token, ${quoteToken.symbol} to produce gas adjusted costs. Route will not account for gas.`
         );
@@ -146,11 +139,7 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory 
 
       /// we will use nativeV2Pool for fallback if nativeV3 does not exist or has 0 liquidity
       /// can use ! here because we return above if v3Pool and v2Pool are null
-      const nativePool =
-        (!nativeV3Pool || JSBI.equal(nativeV3Pool.liquidity, JSBI.BigInt(0))) &&
-        nativeV2Pool
-          ? nativeV2Pool
-          : nativeV3Pool!;
+      const nativePool = nativeV3Pool!;
 
       const gasCostInTermsOfQuoteToken = getQuoteThroughNativePool(
         chainId,
@@ -189,15 +178,24 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory 
     const route = routeWithValidQuote.route;
 
     const res = partitionMixedRouteByProtocol(route);
-    res.map((section: (Pair | Pool)[]) => {
+
+    res.map((section: TPool[]) => {
       if (section.every((pool) => pool instanceof Pool)) {
         baseGasUse = baseGasUse.add(BASE_SWAP_COST(chainId));
         baseGasUse = baseGasUse.add(COST_PER_HOP(chainId).mul(section.length));
-      } else if (section.every((pool) => pool instanceof Pair)) {
-        baseGasUse = baseGasUse.add(BASE_SWAP_COST_V2);
+      } else if (
+        section.every((pool) => pool instanceof ComposableStablePool)
+      ) {
+        baseGasUse = baseGasUse.add(BASE_SWAP_COST_STABLE(chainId));
         baseGasUse = baseGasUse.add(
-          /// same behavior in v2 heuristic gas model factory
-          COST_PER_EXTRA_HOP_V2.mul(section.length - 1)
+          COST_PER_HOP_STABLE(chainId).mul(section.length)
+        );
+      } else if (
+        section.every((pool) => pool instanceof ComposableStablePoolWrapper)
+      ) {
+        baseGasUse = baseGasUse.add(BASE_SWAP_COST_STABLE_WRAPPER(chainId));
+        baseGasUse = baseGasUse.add(
+          COST_PER_HOP_STABLE_WRAPPER(chainId).mul(section.length)
         );
       }
     });

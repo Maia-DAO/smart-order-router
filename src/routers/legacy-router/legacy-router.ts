@@ -1,9 +1,14 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Logger } from '@ethersproject/logger';
-import { SwapRouter, Trade } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
-import { FeeAmount, MethodParameters, Pool, Route } from '@uniswap/v3-sdk';
+import { SwapRouter, Trade } from 'hermes-swap-router-sdk';
+import { FeeAmount, Pool, Route, TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import {
+  ChainId,
+  Currency,
+  MethodParameters,
+  NativeToken,
+} from 'maia-core-sdk';
 
 import { IOnChainQuoteProvider, RouteWithQuotes } from '../../providers';
 import { IMulticallProvider } from '../../providers/multicall-provider';
@@ -204,7 +209,7 @@ export class LegacyRouter {
 
   private async findBestRouteExactIn(
     amountIn: CurrencyAmount,
-    tokenOut: Token,
+    tokenOut: NativeToken,
     routes: V3Route[],
     routingConfig?: LegacyRoutingConfig
   ): Promise<V3RouteWithValidQuote | null> {
@@ -236,7 +241,7 @@ export class LegacyRouter {
 
   private async findBestRouteExactOut(
     amountOut: CurrencyAmount,
-    tokenIn: Token,
+    tokenIn: NativeToken,
     routes: V3Route[],
     routingConfig?: LegacyRoutingConfig
   ): Promise<V3RouteWithValidQuote | null> {
@@ -261,7 +266,7 @@ export class LegacyRouter {
   private async getBestQuote(
     routes: V3Route[],
     quotesRaw: RouteWithQuotes<V3Route>[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     routeType: TradeType
   ): Promise<V3RouteWithValidQuote | null> {
     log.debug(
@@ -334,11 +339,11 @@ export class LegacyRouter {
   }
 
   private async getAllRoutes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     routingConfig?: LegacyRoutingConfig
   ): Promise<V3Route[]> {
-    const tokenPairs: [Token, Token, FeeAmount][] =
+    const tokenPairs: [NativeToken, NativeToken, FeeAmount][] =
       await this.getAllPossiblePairings(tokenIn, tokenOut);
 
     const poolAccessor = await this.poolProvider.getPools(tokenPairs, {
@@ -366,9 +371,9 @@ export class LegacyRouter {
   }
 
   private async getAllPossiblePairings(
-    tokenIn: Token,
-    tokenOut: Token
-  ): Promise<[Token, Token, FeeAmount][]> {
+    tokenIn: NativeToken,
+    tokenOut: NativeToken
+  ): Promise<[NativeToken, NativeToken, FeeAmount][]> {
     const common =
       BASES_TO_CHECK_TRADES_AGAINST(this.tokenProvider)[this.chainId] ?? [];
     const additionalA =
@@ -381,24 +386,25 @@ export class LegacyRouter {
       ] ?? [];
     const bases = [...common, ...additionalA, ...additionalB];
 
-    const basePairs: [Token, Token][] = _.flatMap(
+    const basePairs: [NativeToken, NativeToken][] = _.flatMap(
       bases,
-      (base): [Token, Token][] => bases.map((otherBase) => [base, otherBase])
+      (base): [NativeToken, NativeToken][] =>
+        bases.map((otherBase) => [base, otherBase])
     );
 
     const customBases = (await CUSTOM_BASES(this.tokenProvider))[this.chainId];
 
-    const allPairs: [Token, Token, FeeAmount][] = _([
+    const allPairs: [NativeToken, NativeToken, FeeAmount][] = _([
       // the direct pair
       [tokenIn, tokenOut],
       // token A against all bases
-      ...bases.map((base): [Token, Token] => [tokenIn, base]),
+      ...bases.map((base): [NativeToken, NativeToken] => [tokenIn, base]),
       // token B against all bases
-      ...bases.map((base): [Token, Token] => [tokenOut, base]),
+      ...bases.map((base): [NativeToken, NativeToken] => [tokenOut, base]),
       // each base against all bases
       ...basePairs,
     ])
-      .filter((tokens): tokens is [Token, Token] =>
+      .filter((tokens): tokens is [NativeToken, NativeToken] =>
         Boolean(tokens[0] && tokens[1])
       )
       .filter(
@@ -406,8 +412,10 @@ export class LegacyRouter {
           tokenA.address !== tokenB.address && !tokenA.equals(tokenB)
       )
       .filter(([tokenA, tokenB]) => {
-        const customBasesA: Token[] | undefined = customBases?.[tokenA.address];
-        const customBasesB: Token[] | undefined = customBases?.[tokenB.address];
+        const customBasesA: NativeToken[] | undefined =
+          customBases?.[tokenA.address];
+        const customBasesB: NativeToken[] | undefined =
+          customBases?.[tokenB.address];
 
         if (!customBasesA && !customBasesB) return true;
 
@@ -418,7 +426,7 @@ export class LegacyRouter {
 
         return true;
       })
-      .flatMap<[Token, Token, FeeAmount]>(([tokenA, tokenB]) => {
+      .flatMap<[NativeToken, NativeToken, FeeAmount]>(([tokenA, tokenB]) => {
         return [
           [tokenA, tokenB, FeeAmount.LOW],
           [tokenA, tokenB, FeeAmount.MEDIUM],
@@ -431,13 +439,13 @@ export class LegacyRouter {
   }
 
   private computeAllRoutes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     pools: Pool[],
     chainId: ChainId,
     currentPath: Pool[] = [],
     allPaths: V3Route[] = [],
-    startTokenIn: Token = tokenIn,
+    startTokenIn: NativeToken = tokenIn,
     maxHops = 2
   ): V3Route[] {
     for (const pool of pools) {
@@ -497,6 +505,8 @@ export class LegacyRouter {
         quoteCurrency.currency
       );
 
+      // TODO: Add more empty routes
+
       return new Trade({
         v3Routes: [
           {
@@ -506,6 +516,8 @@ export class LegacyRouter {
           },
         ],
         v2Routes: [],
+        stableRoutes: [],
+        stableWrapperRoutes: [],
         tradeType: tradeType,
       });
     } else {
@@ -527,6 +539,8 @@ export class LegacyRouter {
         amountCurrency.currency
       );
 
+      // TODO: Add more empty routes
+
       return new Trade({
         v3Routes: [
           {
@@ -536,6 +550,8 @@ export class LegacyRouter {
           },
         ],
         v2Routes: [],
+        stableRoutes: [],
+        stableWrapperRoutes: [],
         tradeType: tradeType,
       });
     }

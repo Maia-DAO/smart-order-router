@@ -1,10 +1,6 @@
 import { parseUnits } from '@ethersproject/units';
-import {
-  Currency,
-  CurrencyAmount as CurrencyAmountRaw,
-} from '@uniswap/sdk-core';
-import { FeeAmount } from '@uniswap/v3-sdk';
-import JSBI from 'jsbi';
+import { FeeAmount } from 'hermes-v2-sdk';
+import { Currency, CurrencyAmount as CurrencyAmountRaw } from 'maia-core-sdk';
 
 export class CurrencyAmount extends CurrencyAmountRaw<Currency> {}
 
@@ -13,7 +9,7 @@ export const MAX_UINT160 = '0xffffffffffffffffffffffffffffffffffffffff';
 // Try to parse a user entered amount for a given token
 export function parseAmount(value: string, currency: Currency): CurrencyAmount {
   const typedValueParsed = parseUnits(value, currency.decimals).toString();
-  return CurrencyAmount.fromRawAmount(currency, JSBI.BigInt(typedValueParsed));
+  return CurrencyAmount.fromRawAmount(currency, typedValueParsed);
 }
 
 export function parseFeeAmount(feeAmountStr: string) {

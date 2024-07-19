@@ -1,6 +1,6 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
-import { FeeAmount, Pool } from '@uniswap/v3-sdk';
+import { FeeAmount, Pool } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, NativeToken } from 'maia-core-sdk';
 
 import { metric, MetricLoggerUnit } from '../../util';
 import { log } from '../../util/log';
@@ -40,11 +40,12 @@ export class CachingV3PoolProvider implements IV3PoolProvider {
   ) {}
 
   public async getPools(
-    tokenPairs: [Token, Token, FeeAmount][],
+    tokenPairs: [NativeToken, NativeToken, FeeAmount][],
     providerConfig?: ProviderConfig
   ): Promise<V3PoolAccessor> {
     const poolAddressSet: Set<string> = new Set<string>();
-    const poolsToGetTokenPairs: Array<[Token, Token, FeeAmount]> = [];
+    const poolsToGetTokenPairs: Array<[NativeToken, NativeToken, FeeAmount]> =
+      [];
     const poolsToGetAddresses: string[] = [];
     const poolAddressToPool: { [poolAddress: string]: Pool } = {};
     const blockNumber = await providerConfig?.blockNumber;
@@ -122,8 +123,8 @@ export class CachingV3PoolProvider implements IV3PoolProvider {
 
     return {
       getPool: (
-        tokenA: Token,
-        tokenB: Token,
+        tokenA: NativeToken,
+        tokenB: NativeToken,
         feeAmount: FeeAmount
       ): Pool | undefined => {
         const { poolAddress } = this.getPoolAddress(tokenA, tokenB, feeAmount);
@@ -136,10 +137,10 @@ export class CachingV3PoolProvider implements IV3PoolProvider {
   }
 
   public getPoolAddress(
-    tokenA: Token,
-    tokenB: Token,
+    tokenA: NativeToken,
+    tokenB: NativeToken,
     feeAmount: FeeAmount
-  ): { poolAddress: string; token0: Token; token1: Token } {
+  ): { poolAddress: string; token0: NativeToken; token1: NativeToken } {
     return this.poolProvider.getPoolAddress(tokenA, tokenB, feeAmount);
   }
 }

@@ -1,6 +1,7 @@
-import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
+import { Protocol } from 'hermes-swap-router-sdk';
+import { TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, Currency, NativeToken } from 'maia-core-sdk';
 
 import {
   IOnChainQuoteProvider,
@@ -59,8 +60,8 @@ export class V3Quoter extends BaseQuoter<V3CandidatePools, V3Route> {
   }
 
   protected async getRoutes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     v3CandidatePools: V3CandidatePools,
     _tradeType: TradeType,
     routingConfig: AlphaRouterConfig
@@ -128,7 +129,7 @@ export class V3Quoter extends BaseQuoter<V3CandidatePools, V3Route> {
     routes: V3Route[],
     amounts: CurrencyAmount[],
     percents: number[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig,
     candidatePools?: CandidatePoolsBySelectionCriteria,
@@ -162,7 +163,9 @@ export class V3Quoter extends BaseQuoter<V3CandidatePools, V3Route> {
       `Getting quotes for V3 for ${routes.length} routes with ${amounts.length} amounts per route.`
     );
 
-    const { routesWithQuotes } = await quoteFn<V3Route>(amounts, routes, routingConfig);
+    const { routesWithQuotes } = await quoteFn<V3Route>(amounts, routes, {
+      blockNumber: routingConfig.blockNumber,
+    });
 
     metric.putMetric(
       'V3QuotesLoad',

@@ -1,21 +1,18 @@
-import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Token, TradeType } from '@uniswap/sdk-core';
+import { Protocol } from 'hermes-swap-router-sdk';
+import { TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
-import {
-  MixedRoute,
-  RouteWithValidQuote,
-  V2Route,
-  V3Route,
-} from '../../../../routers';
+import { AllRoutes, RouteWithValidQuote } from '../../../../routers';
 
 import { CachedRoute } from './cached-route';
 
 interface CachedRoutesParams {
-  routes: CachedRoute<V3Route | V2Route | MixedRoute>[];
+  routes: CachedRoute<AllRoutes>[];
   chainId: ChainId;
-  tokenIn: Token;
-  tokenOut: Token;
+  tokenIn: NativeToken;
+  tokenOut: NativeToken;
   protocolsCovered: Protocol[];
   blockNumber: number;
   tradeType: TradeType;
@@ -30,10 +27,10 @@ interface CachedRoutesParams {
  * @class CachedRoute
  */
 export class CachedRoutes {
-  public readonly routes: CachedRoute<V3Route | V2Route | MixedRoute>[];
+  public readonly routes: CachedRoute<AllRoutes>[];
   public readonly chainId: ChainId;
-  public readonly tokenIn: Token;
-  public readonly tokenOut: Token;
+  public readonly tokenIn: NativeToken;
+  public readonly tokenOut: NativeToken;
   public readonly protocolsCovered: Protocol[];
   public readonly blockNumber: number;
   public readonly tradeType: TradeType;
@@ -91,8 +88,8 @@ export class CachedRoutes {
   public static fromRoutesWithValidQuotes(
     routes: RouteWithValidQuote[],
     chainId: ChainId,
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     protocolsCovered: Protocol[],
     blockNumber: number,
     tradeType: TradeType,

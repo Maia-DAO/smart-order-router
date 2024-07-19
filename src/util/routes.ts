@@ -1,30 +1,25 @@
-import { Protocol } from '@uniswap/router-sdk';
-import { Percent } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
-import { Pool } from '@uniswap/v3-sdk';
+import { Protocol, TPool } from 'hermes-swap-router-sdk';
+import { Pair, Pool } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { Percent } from 'maia-core-sdk';
 
 import { RouteWithValidQuote } from '../routers/alpha-router';
-import { MixedRoute, V2Route, V3Route } from '../routers/router';
+import { AllRoutes } from '../routers/router';
 
 import { V3_CORE_FACTORY_ADDRESSES } from './addresses';
+import { CurrencyAmount } from './amounts';
 
-import { CurrencyAmount } from '.';
-
-export const routeToString = (
-  route: V3Route | V2Route | MixedRoute
-): string => {
+export const routeToString = (route: AllRoutes): string => {
   const routeStr = [];
   const tokens =
-    route.protocol === Protocol.V3
-      ? route.tokenPath
-      : // MixedRoute and V2Route have path
-        route.path;
+    route.protocol === Protocol.V2 || route.protocol === Protocol.MIXED
+      ? // MixedRoute and V2Route have path
+        route.path
+      : route.tokenPath;
   const tokenPath = _.map(tokens, (token) => `${token.symbol}`);
-  const pools =
-    route.protocol === Protocol.V3 || route.protocol === Protocol.MIXED
-      ? route.pools
-      : route.pairs;
+  const pools = route.protocol === Protocol.V2 ? route.pairs : route.pools;
+
+  // TODO: Fix this - Add support for BalancerVault and ERC4626 vaults
   const poolFeePath = _.map(pools, (pool) => {
     return `${
       pool instanceof Pool
@@ -66,9 +61,10 @@ export const routeAmountsToString = (
   const routeStrings = _.map(routeAmounts, ({ protocol, route, amount }) => {
     const portion = amount.divide(total);
     const percent = new Percent(portion.numerator, portion.denominator);
+    // TODO: Fix this - Add support for BalancerVault and ERC4626 vaults
     /// @dev special case for MIXED routes we want to show user friendly V2+V3 instead
     return `[${
-      protocol == Protocol.MIXED ? 'V2 + V3' : protocol
+      protocol == Protocol.MIXED ? 'V3 + STABLE' : protocol
     }] ${percent.toFixed(2)}% = ${routeToString(route)}`;
   });
 
@@ -82,7 +78,8 @@ export const routeAmountToString = (
   return `${amount.toExact()} = ${routeToString(route)}`;
 };
 
-export const poolToString = (p: Pool | Pair): string => {
+// TODO: Add support for multiple pools
+export const poolToString = (p: TPool): string => {
   return `${p.token0.symbol}/${p.token1.symbol}${
     p instanceof Pool ? `/${p.fee / 10000}%` : ``
   }`;

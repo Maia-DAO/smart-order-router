@@ -1,6 +1,7 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
+import { Pair } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { NativeToken } from 'maia-core-sdk';
+import { ChainId } from 'maia-core-sdk';
 
 import { log } from '../../util/log';
 
@@ -34,11 +35,11 @@ export class CachingV2PoolProvider implements IV2PoolProvider {
   ) {}
 
   public async getPools(
-    tokenPairs: [Token, Token][],
+    tokenPairs: [NativeToken, NativeToken][],
     providerConfig?: ProviderConfig
   ): Promise<V2PoolAccessor> {
     const poolAddressSet: Set<string> = new Set<string>();
-    const poolsToGetTokenPairs: Array<[Token, Token]> = [];
+    const poolsToGetTokenPairs: Array<[NativeToken, NativeToken]> = [];
     const poolsToGetAddresses: string[] = [];
     const poolAddressToPool: { [poolAddress: string]: Pair } = {};
 
@@ -114,7 +115,7 @@ export class CachingV2PoolProvider implements IV2PoolProvider {
     }
 
     return {
-      getPool: (tokenA: Token, tokenB: Token): Pair | undefined => {
+      getPool: (tokenA: NativeToken, tokenB: NativeToken): Pair | undefined => {
         const { poolAddress } = this.getPoolAddress(tokenA, tokenB);
         return poolAddressToPool[poolAddress];
       },
@@ -125,9 +126,9 @@ export class CachingV2PoolProvider implements IV2PoolProvider {
   }
 
   public getPoolAddress(
-    tokenA: Token,
-    tokenB: Token
-  ): { poolAddress: string; token0: Token; token1: Token } {
+    tokenA: NativeToken,
+    tokenB: NativeToken
+  ): { poolAddress: string; token0: NativeToken; token1: NativeToken } {
     return this.poolProvider.getPoolAddress(tokenA, tokenB);
   }
 }

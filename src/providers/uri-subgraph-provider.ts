@@ -1,10 +1,11 @@
-import { ChainId } from '@uniswap/sdk-core';
 import retry from 'async-retry';
 import Timeout from 'await-timeout';
 import axios from 'axios';
 
 import { log } from '../util/log';
 
+import { ChainId } from 'maia-core-sdk';
+import { StableSubgraphPool } from './stable/subgraph-provider';
 import { V2SubgraphPool } from './v2/subgraph-provider';
 import { V3SubgraphPool } from './v3/subgraph-provider';
 
@@ -18,7 +19,7 @@ import { V3SubgraphPool } from './v3/subgraph-provider';
  * @template TSubgraphPool
  */
 export class URISubgraphProvider<
-  TSubgraphPool extends V2SubgraphPool | V3SubgraphPool
+  TSubgraphPool extends V2SubgraphPool | V3SubgraphPool | StableSubgraphPool
 > {
   constructor(
     private chainId: ChainId,

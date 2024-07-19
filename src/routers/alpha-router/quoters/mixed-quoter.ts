@@ -1,14 +1,15 @@
-import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
+import { Protocol } from 'hermes-swap-router-sdk';
+import { TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, Currency, NativeToken } from 'maia-core-sdk';
 
 import {
   IOnChainQuoteProvider,
+  IStablePoolProvider,
+  IStableSubgraphProvider,
   ITokenListProvider,
   ITokenProvider,
   ITokenValidatorProvider,
-  IV2PoolProvider,
-  IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
   TokenValidationResult,
@@ -27,7 +28,7 @@ import { computeAllMixedRoutes } from '../functions/compute-all-routes';
 import {
   CandidatePoolsBySelectionCriteria,
   getMixedRouteCandidatePools,
-  V2CandidatePools,
+  StableCandidatePools,
   V3CandidatePools,
 } from '../functions/get-candidate-pools';
 import { IGasModel } from '../gas-models';
@@ -36,20 +37,21 @@ import { BaseQuoter } from './base-quoter';
 import { GetQuotesResult, GetRoutesResult } from './model';
 
 export class MixedQuoter extends BaseQuoter<
-  [V3CandidatePools, V2CandidatePools],
+  // TODO: Add support for multiple pools
+  [V3CandidatePools, StableCandidatePools],
   MixedRoute
 > {
+  protected stableSubgraphProvider: IStableSubgraphProvider;
+  protected stablePoolProvider: IStablePoolProvider;
   protected v3SubgraphProvider: IV3SubgraphProvider;
   protected v3PoolProvider: IV3PoolProvider;
-  protected v2SubgraphProvider: IV2SubgraphProvider;
-  protected v2PoolProvider: IV2PoolProvider;
   protected onChainQuoteProvider: IOnChainQuoteProvider;
 
   constructor(
+    stableSubgraphProvider: IStableSubgraphProvider,
+    stablePoolProvider: IStablePoolProvider,
     v3SubgraphProvider: IV3SubgraphProvider,
     v3PoolProvider: IV3PoolProvider,
-    v2SubgraphProvider: IV2SubgraphProvider,
-    v2PoolProvider: IV2PoolProvider,
     onChainQuoteProvider: IOnChainQuoteProvider,
     tokenProvider: ITokenProvider,
     chainId: ChainId,
@@ -63,17 +65,17 @@ export class MixedQuoter extends BaseQuoter<
       blockedTokenListProvider,
       tokenValidatorProvider
     );
+    this.stableSubgraphProvider = stableSubgraphProvider;
+    this.stablePoolProvider = stablePoolProvider;
     this.v3SubgraphProvider = v3SubgraphProvider;
     this.v3PoolProvider = v3PoolProvider;
-    this.v2SubgraphProvider = v2SubgraphProvider;
-    this.v2PoolProvider = v2PoolProvider;
     this.onChainQuoteProvider = onChainQuoteProvider;
   }
 
   protected async getRoutes(
-    tokenIn: Token,
-    tokenOut: Token,
-    v3v2candidatePools: [V3CandidatePools, V2CandidatePools],
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
+    uniqueCandidatePools: [V3CandidatePools, StableCandidatePools],
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig
   ): Promise<GetRoutesResult<MixedRoute>> {
@@ -83,26 +85,26 @@ export class MixedQuoter extends BaseQuoter<
       throw new Error('Mixed route quotes are not supported for EXACT_OUTPUT');
     }
 
-    const [v3CandidatePools, v2CandidatePools] = v3v2candidatePools;
+    const [v3CandidatePools, stableCandidatePools] = uniqueCandidatePools;
 
     const {
-      V2poolAccessor,
+      StablePoolAccessor,
       V3poolAccessor,
       candidatePools: mixedRouteCandidatePools,
     } = await getMixedRouteCandidatePools({
+      stableCandidatePools,
       v3CandidatePools,
-      v2CandidatePools,
       tokenProvider: this.tokenProvider,
       v3poolProvider: this.v3PoolProvider,
-      v2poolProvider: this.v2PoolProvider,
+      stablePoolProvider: this.stablePoolProvider,
       routingConfig,
       chainId: this.chainId,
     });
 
     const V3poolsRaw = V3poolAccessor.getAllPools();
-    const V2poolsRaw = V2poolAccessor.getAllPools();
+    const StablePoolsRaw = StablePoolAccessor.getAllPools();
 
-    const poolsRaw = [...V3poolsRaw, ...V2poolsRaw];
+    const poolsRaw = [...V3poolsRaw, ...StablePoolsRaw];
 
     const candidatePools = mixedRouteCandidatePools;
 
@@ -162,7 +164,7 @@ export class MixedQuoter extends BaseQuoter<
     routes: MixedRoute[],
     amounts: CurrencyAmount[],
     percents: number[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig,
     candidatePools?: CandidatePoolsBySelectionCriteria,
@@ -189,7 +191,9 @@ export class MixedQuoter extends BaseQuoter<
       `Getting quotes for mixed for ${routes.length} routes with ${amounts.length} amounts per route.`
     );
 
-    const { routesWithQuotes } = await quoteFn<MixedRoute>(amounts, routes, routingConfig);
+    const { routesWithQuotes } = await quoteFn<MixedRoute>(amounts, routes, {
+      blockNumber: routingConfig.blockNumber,
+    });
 
     metric.putMetric(
       'MixedQuotesLoad',
@@ -213,20 +217,9 @@ export class MixedQuoter extends BaseQuoter<
       for (let i = 0; i < quotes.length; i++) {
         const percent = percents[i]!;
         const amountQuote = quotes[i]!;
-        const {
-          quote,
-          amount,
-          sqrtPriceX96AfterList,
-          initializedTicksCrossedList,
-          gasEstimate,
-        } = amountQuote;
+        const { quote, amount } = amountQuote;
 
-        if (
-          !quote ||
-          !sqrtPriceX96AfterList ||
-          !initializedTicksCrossedList ||
-          !gasEstimate
-        ) {
+        if (!quote) {
           log.debug(
             {
               route: routeToString(route),
@@ -242,14 +235,12 @@ export class MixedQuoter extends BaseQuoter<
           rawQuote: quote,
           amount,
           percent,
-          sqrtPriceX96AfterList,
-          initializedTicksCrossedList,
-          quoterGasEstimate: gasEstimate,
+          sqrtPriceX96AfterList: [],
+          initializedTicksCrossedList: [],
           mixedRouteGasModel: gasModel,
           quoteToken,
           tradeType,
           v3PoolProvider: this.v3PoolProvider,
-          v2PoolProvider: this.v2PoolProvider,
         });
 
         routesWithValidQuotes.push(routeWithValidQuote);

@@ -1,26 +1,28 @@
+import { MixedRouteSDK, Protocol, Trade } from 'hermes-swap-router-sdk';
 import {
-  MixedRouteSDK,
-  Protocol,
-  SwapRouter as SwapRouter02,
-  Trade,
-} from '@uniswap/router-sdk';
-import { ChainId, Currency, TradeType } from '@uniswap/sdk-core';
-import {
-  SwapRouter as UniversalRouter,
   UNIVERSAL_ROUTER_ADDRESS,
-} from '@uniswap/universal-router-sdk';
-import { Route as V2RouteRaw } from '@uniswap/v2-sdk';
-import { Route as V3RouteRaw } from '@uniswap/v3-sdk';
+  SwapRouter as UniversalRouter,
+} from 'hermes-universal-router-sdk';
+import {
+  ComposableStablePool,
+  ComposableStablePoolWrapper,
+  Pool,
+  TradeType,
+  V2RouteSDK as V2RouteRaw,
+  Route as V3RouteRaw,
+} from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, Currency } from 'maia-core-sdk';
 
 import {
   CurrencyAmount,
   MethodParameters,
   MixedRouteWithValidQuote,
   RouteWithValidQuote,
+  StableRouteWithValidQuote,
+  StableWrapperRouteWithValidQuote,
   SwapOptions,
   SwapType,
-  SWAP_ROUTER_02_ADDRESSES,
   V2RouteWithValidQuote,
   V3RouteWithValidQuote,
 } from '..';
@@ -40,15 +42,159 @@ export function buildTrade<TTradeType extends TradeType>(
     routeAmounts,
     (routeAmount) => routeAmount.protocol === Protocol.V2
   );
+  const sableRouteAmounts = _.filter(
+    routeAmounts,
+    (routeAmount) => routeAmount.protocol === Protocol.BAL_STABLE
+  );
+  const sableWrapperRouteAmounts = _.filter(
+    routeAmounts,
+    (routeAmount) => routeAmount.protocol === Protocol.BAL_STABLE_WRAPPER
+  );
   const mixedRouteAmounts = _.filter(
     routeAmounts,
     (routeAmount) => routeAmount.protocol === Protocol.MIXED
   );
 
+  const stableRoutes = _.map<
+    StableRouteWithValidQuote,
+    {
+      routeStable: V3RouteRaw<ComposableStablePool, Currency, Currency>;
+      inputAmount: CurrencyAmount;
+      outputAmount: CurrencyAmount;
+    }
+  >(
+    sableRouteAmounts as StableRouteWithValidQuote[],
+    (routeAmount: StableRouteWithValidQuote) => {
+      const { route, amount, quote } = routeAmount;
+
+      // The route, amount and quote are all in terms of wrapped tokens.
+      // When constructing the Trade object the inputAmount/outputAmount must
+      // use native currencies if specified by the user. This is so that the Trade knows to wrap/unwrap.
+      if (tradeType == TradeType.EXACT_INPUT) {
+        const amountCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenInCurrency,
+          amount.numerator,
+          amount.denominator
+        );
+        const quoteCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenOutCurrency,
+          quote.numerator,
+          quote.denominator
+        );
+
+        const routeRaw = new V3RouteRaw(
+          route.pools,
+          amountCurrency.currency,
+          quoteCurrency.currency
+        );
+
+        return {
+          routeStable: routeRaw,
+          inputAmount: amountCurrency,
+          outputAmount: quoteCurrency,
+        };
+      } else {
+        const quoteCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenInCurrency,
+          quote.numerator,
+          quote.denominator
+        );
+
+        const amountCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenOutCurrency,
+          amount.numerator,
+          amount.denominator
+        );
+
+        const routeCurrency = new V3RouteRaw(
+          route.pools,
+          quoteCurrency.currency,
+          amountCurrency.currency
+        );
+
+        return {
+          routeStable: routeCurrency,
+          inputAmount: quoteCurrency,
+          outputAmount: amountCurrency,
+        };
+      }
+    }
+  );
+
+  const stableWrapperRoutes = _.map<
+    StableWrapperRouteWithValidQuote,
+    {
+      routeStableWrapper: V3RouteRaw<
+        ComposableStablePoolWrapper,
+        Currency,
+        Currency
+      >;
+      inputAmount: CurrencyAmount;
+      outputAmount: CurrencyAmount;
+    }
+  >(
+    sableWrapperRouteAmounts as StableWrapperRouteWithValidQuote[],
+    (routeAmount: StableWrapperRouteWithValidQuote) => {
+      const { route, amount, quote } = routeAmount;
+
+      // The route, amount and quote are all in terms of wrapped tokens.
+      // When constructing the Trade object the inputAmount/outputAmount must
+      // use native currencies if specified by the user. This is so that the Trade knows to wrap/unwrap.
+      if (tradeType == TradeType.EXACT_INPUT) {
+        const amountCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenInCurrency,
+          amount.numerator,
+          amount.denominator
+        );
+        const quoteCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenOutCurrency,
+          quote.numerator,
+          quote.denominator
+        );
+
+        const routeRaw = new V3RouteRaw(
+          route.pools,
+          amountCurrency.currency,
+          quoteCurrency.currency
+        );
+
+        return {
+          routeStableWrapper: routeRaw,
+          inputAmount: amountCurrency,
+          outputAmount: quoteCurrency,
+        };
+      } else {
+        const quoteCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenInCurrency,
+          quote.numerator,
+          quote.denominator
+        );
+
+        const amountCurrency = CurrencyAmount.fromFractionalAmount(
+          tokenOutCurrency,
+          amount.numerator,
+          amount.denominator
+        );
+
+        const routeCurrency = new V3RouteRaw(
+          route.pools,
+          quoteCurrency.currency,
+          amountCurrency.currency
+        );
+
+        return {
+          routeStableWrapper: routeCurrency,
+          inputAmount: quoteCurrency,
+          outputAmount: amountCurrency,
+        };
+      }
+    }
+  );
+
   const v3Routes = _.map<
     V3RouteWithValidQuote,
     {
-      routev3: V3RouteRaw<Currency, Currency>;
+      routev3: V3RouteRaw<Pool, Currency, Currency>;
       inputAmount: CurrencyAmount;
       outputAmount: CurrencyAmount;
     }
@@ -223,7 +369,14 @@ export function buildTrade<TTradeType extends TradeType>(
     }
   );
 
-  const trade = new Trade({ v2Routes, v3Routes, mixedRoutes, tradeType });
+  const trade = new Trade({
+    v2Routes,
+    v3Routes,
+    stableRoutes,
+    stableWrapperRoutes,
+    mixedRoutes,
+    tradeType,
+  });
 
   return trade;
 }
@@ -237,19 +390,6 @@ export function buildSwapMethodParameters(
     return {
       ...UniversalRouter.swapERC20CallParameters(trade, swapConfig),
       to: UNIVERSAL_ROUTER_ADDRESS(chainId),
-    };
-  } else if (swapConfig.type == SwapType.SWAP_ROUTER_02) {
-    const { recipient, slippageTolerance, deadline, inputTokenPermit } =
-      swapConfig;
-
-    return {
-      ...SwapRouter02.swapCallParameters(trade, {
-        recipient,
-        slippageTolerance,
-        deadlineOrPreviousBlockhash: deadline,
-        inputTokenPermit,
-      }),
-      to: SWAP_ROUTER_02_ADDRESSES(chainId),
     };
   }
 

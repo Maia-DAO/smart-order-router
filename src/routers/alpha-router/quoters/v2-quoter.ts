@@ -1,7 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
+import { Protocol } from 'hermes-swap-router-sdk';
+import { TradeType } from 'hermes-v2-sdk';
 import _ from 'lodash';
+import { ChainId, Currency, NativeToken } from 'maia-core-sdk';
 
 import {
   ITokenListProvider,
@@ -28,12 +29,8 @@ import {
   V2CandidatePools,
 } from '../functions/get-candidate-pools';
 import { IGasModel, IV2GasModelFactory } from '../gas-models';
-import { NATIVE_OVERHEAD } from '../gas-models/v3/gas-costs';
+import { NATIVE_OVERHEAD } from '../gas-models/v3/v3-gas-costs';
 
-import {
-  ArbitrumGasData,
-  IL2GasDataProvider,
-} from '../../../providers/v3/gas-data-provider';
 import { BaseQuoter } from './base-quoter';
 import { GetQuotesResult } from './model/results/get-quotes-result';
 import { GetRoutesResult } from './model/results/get-routes-result';
@@ -43,7 +40,6 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
   protected v2PoolProvider: IV2PoolProvider;
   protected v2QuoteProvider: IV2QuoteProvider;
   protected v2GasModelFactory: IV2GasModelFactory;
-  protected l2GasDataProvider?: IL2GasDataProvider<ArbitrumGasData>;
 
   constructor(
     v2SubgraphProvider: IV2SubgraphProvider,
@@ -53,8 +49,7 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
     tokenProvider: ITokenProvider,
     chainId: ChainId,
     blockedTokenListProvider?: ITokenListProvider,
-    tokenValidatorProvider?: ITokenValidatorProvider,
-    l2GasDataProvider?: IL2GasDataProvider<ArbitrumGasData>
+    tokenValidatorProvider?: ITokenValidatorProvider
   ) {
     super(
       tokenProvider,
@@ -67,12 +62,11 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
     this.v2PoolProvider = v2PoolProvider;
     this.v2QuoteProvider = v2QuoteProvider;
     this.v2GasModelFactory = v2GasModelFactory;
-    this.l2GasDataProvider = l2GasDataProvider;
   }
 
   protected async getRoutes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     v2CandidatePools: V2CandidatePools,
     _tradeType: TradeType,
     routingConfig: AlphaRouterConfig
@@ -136,7 +130,7 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
     routes: V2Route[],
     amounts: CurrencyAmount[],
     percents: number[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     _routingConfig: AlphaRouterConfig,
     candidatePools?: CandidatePoolsBySelectionCriteria,
@@ -187,7 +181,6 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
       gasPriceWei,
       poolProvider: this.v2PoolProvider,
       token: quoteToken,
-      l2GasDataProvider: this.l2GasDataProvider,
       providerConfig: {
         ..._routingConfig,
         additionalGasOverhead: NATIVE_OVERHEAD(
@@ -262,17 +255,17 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
   }
 
   public async refreshRoutesThenGetQuotes(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: NativeToken,
+    tokenOut: NativeToken,
     routes: V2Route[],
     amounts: CurrencyAmount[],
     percents: number[],
-    quoteToken: Token,
+    quoteToken: NativeToken,
     tradeType: TradeType,
     routingConfig: AlphaRouterConfig,
     gasPriceWei?: BigNumber
   ): Promise<GetQuotesResult> {
-    const tokenPairs: [Token, Token][] = [];
+    const tokenPairs: [NativeToken, NativeToken][] = [];
     routes.forEach((route) =>
       route.pairs.forEach((pair) => tokenPairs.push([pair.token0, pair.token1]))
     );
