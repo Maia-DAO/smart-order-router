@@ -7,7 +7,7 @@ node_modules
 src/**.js
 coverage
 *.log
-yarn.lock
+package-lock.json
 types
 types/*
 .env
