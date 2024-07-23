@@ -13,9 +13,9 @@ import {
 import { IOnChainQuoteProvider, RouteWithQuotes } from '../../providers';
 import { IMulticallProvider } from '../../providers/multicall-provider';
 import {
-  DAI_MAINNET,
+  DAI_ARBITRUM,
   ITokenProvider,
-  USDC_MAINNET,
+  USDC_SEPOLIA,
 } from '../../providers/token-provider';
 import { IV3PoolProvider } from '../../providers/v3/pool-provider';
 import { SWAP_ROUTER_02_ADDRESSES } from '../../util';
@@ -136,7 +136,7 @@ export class LegacyRouter {
         1
       ),
       estimatedGasUsedUSD: CurrencyAmount.fromFractionalAmount(
-        DAI_MAINNET!,
+        DAI_ARBITRUM!,
         0,
         1
       ),
@@ -191,7 +191,7 @@ export class LegacyRouter {
         1
       ),
       estimatedGasUsedUSD: CurrencyAmount.fromFractionalAmount(
-        DAI_MAINNET,
+        DAI_ARBITRUM,
         0,
         1
       ),
@@ -314,7 +314,7 @@ export class LegacyRouter {
         gasModel: {
           estimateGasCost: () => ({
             gasCostInToken: CurrencyAmount.fromRawAmount(quoteToken, 0),
-            gasCostInUSD: CurrencyAmount.fromRawAmount(USDC_MAINNET, 0),
+            gasCostInUSD: CurrencyAmount.fromRawAmount(USDC_SEPOLIA, 0),
             gasEstimate: BigNumber.from(0),
           }),
         },

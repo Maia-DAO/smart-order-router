@@ -40,7 +40,6 @@ import {
   BASE_SWAP_COST as BASE_SWAP_COST_STABLE,
   COST_PER_HOP as COST_PER_HOP_STABLE,
   SINGLE_HOP_OVERHEAD as SINGLE_HOP_OVERHEAD_STABLE,
-  TOKEN_OVERHEAD as TOKEN_OVERHEAD_STABLE,
 } from './stable-gas-costs';
 import {
   BASE_SWAP_COST as BASE_SWAP_COST_STABLE_WRAPPER,
@@ -53,7 +52,6 @@ import {
   COST_PER_INIT_TICK,
   COST_PER_UNINIT_TICK,
   SINGLE_HOP_OVERHEAD,
-  TOKEN_OVERHEAD,
 } from './v3-gas-costs';
 
 /**
@@ -361,10 +359,10 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
         hopsGasUse = hopsGasUse.add(SINGLE_HOP_OVERHEAD(chainId));
       }
 
-      // Some tokens have extremely expensive transferFrom functions, which causes
-      // us to underestimate them by a large amount. For known tokens, we apply an
-      // adjustment.
-      const tokenOverhead = TOKEN_OVERHEAD(chainId, routeWithValidQuote.route);
+      // // Some tokens have extremely expensive transferFrom functions, which causes
+      // // us to underestimate them by a large amount. For known tokens, we apply an
+      // // adjustment.
+      // const tokenOverhead = TOKEN_OVERHEAD(chainId, routeWithValidQuote.route);
 
       const tickGasUse = COST_PER_INIT_TICK(chainId).mul(
         totalInitializedTicksCrossed
@@ -374,7 +372,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       // base estimate gas used based on chainId estimates for hops and ticks gas useage
       const baseGasUse = BASE_SWAP_COST(chainId)
         .add(hopsGasUse)
-        .add(tokenOverhead)
+        // .add(tokenOverhead)
         .add(tickGasUse)
         .add(uninitializedTickGasUse)
         .add(providerConfig?.additionalGasOverhead ?? BigNumber.from(0));
@@ -402,18 +400,18 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
         hopsGasUse = hopsGasUse.add(SINGLE_HOP_OVERHEAD_STABLE(chainId));
       }
 
-      // Some tokens have extremely expensive transferFrom functions, which causes
-      // us to underestimate them by a large amount. For known tokens, we apply an
-      // adjustment.
-      const tokenOverhead = TOKEN_OVERHEAD_STABLE(
-        chainId,
-        routeWithValidQuote.route
-      );
+      // // Some tokens have extremely expensive transferFrom functions, which causes
+      // // us to underestimate them by a large amount. For known tokens, we apply an
+      // // adjustment.
+      // const tokenOverhead = TOKEN_OVERHEAD_STABLE(
+      //   chainId,
+      //   routeWithValidQuote.route
+      // );
 
       // base estimate gas used based on chainId estimates for hops and ticks gas useage
       const baseGasUse = BASE_SWAP_COST_STABLE(chainId)
         .add(hopsGasUse)
-        .add(tokenOverhead)
+        // .add(tokenOverhead)
         .add(providerConfig?.additionalGasOverhead ?? BigNumber.from(0));
 
       const baseGasCostWei = gasPriceWei.mul(baseGasUse);

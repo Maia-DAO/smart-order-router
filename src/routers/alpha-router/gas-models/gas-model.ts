@@ -10,15 +10,11 @@ import {
 import { ProviderConfig } from '../../../providers/provider';
 import {
   DAI_ARBITRUM,
-  DAI_MAINNET,
-  DAI_OPTIMISM,
+  DAI_SEPOLIA,
   USDC_ARBITRUM,
-  USDC_MAINNET,
-  USDC_OPTIMISM,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_MAINNET,
-  USDT_OPTIMISM,
+  USDT_SEPOLIA,
 } from '../../../providers/token-provider';
 import { IV2PoolProvider } from '../../../providers/v2/pool-provider';
 import {
@@ -41,10 +37,8 @@ import {
 // from tokens with highest decimals to lowest decimals. For example,
 // DAI_AVAX has 18 decimals and comes before USDC_AVAX which has 6 decimals.
 export const usdGasTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
-  [ChainId.MAINNET]: [DAI_MAINNET, USDC_MAINNET, USDT_MAINNET],
   [ChainId.ARBITRUM_ONE]: [DAI_ARBITRUM, USDC_ARBITRUM, USDT_ARBITRUM],
-  [ChainId.OPTIMISM]: [DAI_OPTIMISM, USDC_OPTIMISM, USDT_OPTIMISM],
-  [ChainId.SEPOLIA]: [USDC_SEPOLIA], // [DAI_SEPOLIA, USDC_SEPOLIA],
+  [ChainId.SEPOLIA]: [DAI_SEPOLIA, USDC_SEPOLIA, USDT_SEPOLIA],
 };
 
 export type L1ToL2GasCosts = {

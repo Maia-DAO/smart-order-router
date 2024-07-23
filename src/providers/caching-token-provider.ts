@@ -6,56 +6,25 @@ import { log, WRAPPED_NATIVE_CURRENCY } from '../util';
 import { ICache } from './cache';
 import {
   DAI_ARBITRUM,
-  DAI_MAINNET,
-  DAI_OPTIMISM,
   DAI_SEPOLIA,
   ITokenProvider,
   TokenAccessor,
   USDC_ARBITRUM,
-  USDC_MAINNET,
-  USDC_OPTIMISM,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_MAINNET,
-  USDT_OPTIMISM,
   USDT_SEPOLIA,
   WBTC_ARBITRUM,
-  WBTC_MAINNET,
-  WBTC_OPTIMISM,
 } from './token-provider';
 
 // These tokens will added to the NativeToken cache on initialization.
 export const CACHE_SEED_TOKENS: {
   [chainId in ChainId]?: { [symbol: string]: NativeToken };
 } = {
-  [ChainId.MAINNET]: {
-    WETH: WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET]!,
-    USDC: USDC_MAINNET,
-    USDT: USDT_MAINNET,
-    WBTC: WBTC_MAINNET,
-    DAI: DAI_MAINNET,
-    // This token stores its symbol as bytes32, therefore can not be fetched on-chain using
-    // our token providers.
-    // This workaround adds it to the cache, so we won't try to fetch it on-chain.
-    RING: new NativeToken(
-      ChainId.MAINNET,
-      '0x9469D013805bFfB7D3DEBe5E7839237e535ec483',
-      18,
-      'RING',
-      'RING'
-    ),
-  },
   [ChainId.SEPOLIA]: {
     WETH: WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
     USDC: USDC_SEPOLIA,
     USDT: USDT_SEPOLIA,
     DAI: DAI_SEPOLIA,
-  },
-  [ChainId.OPTIMISM]: {
-    USDC: USDC_OPTIMISM,
-    USDT: USDT_OPTIMISM,
-    WBTC: WBTC_OPTIMISM,
-    DAI: DAI_OPTIMISM,
   },
   [ChainId.ARBITRUM_ONE]: {
     USDC: USDC_ARBITRUM,

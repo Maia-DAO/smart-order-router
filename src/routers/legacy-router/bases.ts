@@ -3,11 +3,10 @@
 import { ChainId, NativeToken } from 'maia-core-sdk';
 
 import {
-  DAI_MAINNET,
+  DAI_SEPOLIA,
   ITokenProvider,
-  USDC_MAINNET,
-  USDT_MAINNET,
-  WBTC_MAINNET,
+  USDC_SEPOLIA,
+  USDT_SEPOLIA,
 } from '../../providers/token-provider';
 import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 
@@ -19,16 +18,15 @@ export const BASES_TO_CHECK_TRADES_AGAINST = (
   _tokenProvider: ITokenProvider
 ): ChainTokenList => {
   return {
-    [ChainId.MAINNET]: [
-      WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET]!,
-      DAI_MAINNET,
-      USDC_MAINNET,
-      USDT_MAINNET,
-      WBTC_MAINNET,
+    [ChainId.MAINNET]: [],
+    [ChainId.SEPOLIA]: [
+      WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
+      USDC_SEPOLIA,
+      DAI_SEPOLIA,
+      USDT_SEPOLIA,
     ],
-    [ChainId.SEPOLIA]: [WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!],
     [ChainId.ARBITRUM_ONE]: [WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!],
-    [ChainId.OPTIMISM]: [WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM]!],
+    [ChainId.OPTIMISM]: [],
   };
 };
 
@@ -113,24 +111,11 @@ export const ADDITIONAL_BASES = async (
  * tokens.
  */
 export const CUSTOM_BASES = async (
-  tokenProvider: ITokenProvider
+  _tokenProvider: ITokenProvider
 ): Promise<{
   [chainId in ChainId]?: { [tokenAddress: string]: NativeToken[] };
 }> => {
   return {
-    [ChainId.MAINNET]: {
-      ...(await getBasePairByAddress(
-        tokenProvider,
-        ChainId.MAINNET,
-        '0xd46ba6d942050d489dbd938a2c909a5d5039a161',
-        DAI_MAINNET.address
-      )),
-      ...(await getBasePairByAddress(
-        tokenProvider,
-        ChainId.MAINNET,
-        '0xd46ba6d942050d489dbd938a2c909a5d5039a161',
-        WRAPPED_NATIVE_CURRENCY[1]!.address
-      )),
-    },
+    [ChainId.MAINNET]: {},
   };
 };

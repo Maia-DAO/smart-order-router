@@ -15,27 +15,14 @@ import {
   StablePoolAccessor,
 } from '../../../providers/stable/pool-provider';
 import {
-  BPT_THREE_USD_SEPOLIA,
-  BPT_USD_SEPOLIA,
   DAI_ARBITRUM,
-  DAI_MAINNET,
-  DAI_OPTIMISM,
   DAI_SEPOLIA,
-  FEI_MAINNET,
   ITokenProvider,
   USDC_ARBITRUM,
-  USDC_MAINNET,
-  USDC_OPTIMISM,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_MAINNET,
-  USDT_OPTIMISM,
   USDT_SEPOLIA,
-  WBPT_USD_SEPOLIA,
   WBTC_ARBITRUM,
-  WBTC_MAINNET,
-  WBTC_OPTIMISM,
-  WTBPT_SEPOLIA,
 } from '../../../providers/token-provider';
 import {
   IV2PoolProvider,
@@ -122,26 +109,8 @@ export type MixedRouteGetCandidatePoolsParams = {
 };
 
 const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
-  [ChainId.MAINNET]: [
-    USDC_MAINNET,
-    USDT_MAINNET,
-    WBTC_MAINNET,
-    DAI_MAINNET,
-    WRAPPED_NATIVE_CURRENCY[1]!,
-    FEI_MAINNET,
-  ],
-  [ChainId.OPTIMISM]: [
-    DAI_OPTIMISM,
-    USDC_OPTIMISM,
-    USDT_OPTIMISM,
-    WBTC_OPTIMISM,
-  ],
   [ChainId.SEPOLIA]: [
     WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
-    WBPT_USD_SEPOLIA,
-    WTBPT_SEPOLIA,
-    BPT_THREE_USD_SEPOLIA,
-    BPT_USD_SEPOLIA,
     USDC_SEPOLIA,
     DAI_SEPOLIA,
     USDT_SEPOLIA,

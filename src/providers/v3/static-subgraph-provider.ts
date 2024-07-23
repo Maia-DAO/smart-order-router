@@ -10,24 +10,13 @@ import { log } from '../../util/log';
 import { ProviderConfig } from '../provider';
 import {
   ARB_ARBITRUM,
-  BPT_USD_SEPOLIA,
   DAI_ARBITRUM,
-  DAI_MAINNET,
-  DAI_OPTIMISM,
   DAI_SEPOLIA,
-  OP_OPTIMISM,
   USDC_ARBITRUM,
-  USDC_MAINNET,
-  USDC_OPTIMISM,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_MAINNET,
-  USDT_OPTIMISM,
   USDT_SEPOLIA,
-  WBPT_USD_SEPOLIA,
   WBTC_ARBITRUM,
-  WBTC_MAINNET,
-  WBTC_OPTIMISM,
 } from '../token-provider';
 
 import { IV3PoolProvider } from './pool-provider';
@@ -38,29 +27,14 @@ type ChainTokenList = {
 };
 
 const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
-  [ChainId.MAINNET]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET]!,
-    DAI_MAINNET,
-    USDC_MAINNET,
-    USDT_MAINNET,
-    WBTC_MAINNET,
-  ],
+  [ChainId.MAINNET]: [],
   [ChainId.SEPOLIA]: [
     WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
-    WBPT_USD_SEPOLIA,
-    BPT_USD_SEPOLIA,
     USDC_SEPOLIA,
     DAI_SEPOLIA,
     USDT_SEPOLIA,
   ],
-  [ChainId.OPTIMISM]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.OPTIMISM]!,
-    USDC_OPTIMISM,
-    DAI_OPTIMISM,
-    USDT_OPTIMISM,
-    WBTC_OPTIMISM,
-    OP_OPTIMISM,
-  ],
+  [ChainId.OPTIMISM]: [],
   [ChainId.ARBITRUM_ONE]: [
     WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!,
     WBTC_ARBITRUM,
