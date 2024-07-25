@@ -1,6 +1,6 @@
 import { ChainId } from 'maia-core-sdk';
 
-import { AlphaRouterConfig, LowerCaseStringArray } from './alpha-router';
+import { AlphaRouterConfig } from './alpha-router';
 
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (
   chainId: ChainId
@@ -81,9 +81,6 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (
           topNDirectSwaps: 0,
           topNTokenInOut: 0,
           topNSecondHop: 0,
-          tokensToAvoidOnSecondHops: new LowerCaseStringArray(
-            '0xd46ba6d942050d489dbd938a2c909a5d5039a161' // AMPL on Mainnet
-          ),
           topNWithEachBaseToken: 0,
           topNWithBaseToken: 0,
         },

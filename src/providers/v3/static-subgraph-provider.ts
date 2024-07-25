@@ -17,6 +17,9 @@ import {
   USDT_ARBITRUM,
   USDT_SEPOLIA,
   WBTC_ARBITRUM,
+  WuDAI_SEPOLIA,
+  WuUSDC_SEPOLIA,
+  WuUSDT_SEPOLIA,
 } from '../token-provider';
 
 import { IV3PoolProvider } from './pool-provider';
@@ -33,6 +36,9 @@ const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     USDC_SEPOLIA,
     DAI_SEPOLIA,
     USDT_SEPOLIA,
+    WuUSDC_SEPOLIA,
+    WuDAI_SEPOLIA,
+    WuUSDT_SEPOLIA,
   ],
   [ChainId.OPTIMISM]: [],
   [ChainId.ARBITRUM_ONE]: [

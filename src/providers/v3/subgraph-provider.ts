@@ -52,7 +52,7 @@ const SUBGRAPH_URL_BY_CHAIN: { [chainId in ChainId]?: string } = {
   [ChainId.ARBITRUM_ONE]:
     'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-minimal',
   [ChainId.SEPOLIA]:
-    'https://subgraph.satsuma-prod.com/917209a9d9b8/maias-team--1290408/hermes-v2/api',
+    'https://subgraph.satsuma-prod.com/917209a9d9b8/maias-team--1290408/sepolia-v3/api',
 };
 
 const PAGE_SIZE = 1000; // 1k is max possible query size from subgraph.

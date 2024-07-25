@@ -136,6 +136,10 @@ Total ticks crossed: 7
 ## Sepolia
 
 ```
+./bin/cli quote --tokenIn 0xd0970Ff4B2aCD013Ae087dD44001EF1Be60e8060 --tokenOut 0xED4e7EA2230FAc7D5bE409F92a9a6324c85fd202 --amount 1 --exactIn --minSplits 1 --router alpha --chainId 11155111 --protocols v3,bal,mixed --debug
+```
+
+```
 ./bin/cli quote --tokenIn 0x7AF17A48a6336F7dc1beF9D485139f7B6f4FB5C8 --tokenOut 0x6f14C02Fc1F78322cFd7d707aB90f18baD3B54f5 --amount 10 --exactIn --minSplits 1 --router alpha --chainId 11155111
 ```
 

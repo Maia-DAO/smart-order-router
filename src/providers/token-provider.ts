@@ -60,6 +60,27 @@ export const USDT_SEPOLIA = new NativeToken(
   'USDT',
   'USDT Stablecoin'
 );
+export const WuUSDC_SEPOLIA = new NativeToken(
+  ChainId.SEPOLIA,
+  '0x4fA0d00564D940bF7e9198bFb61a0EDdb0D6bE82',
+  18,
+  'WuUSDC',
+  'Wrapped Ulysses USDC Stablecoin'
+);
+export const WuDAI_SEPOLIA = new NativeToken(
+  ChainId.SEPOLIA,
+  '0x3f3A23BE22926fDd261A8AFA480EEE667A1Adf69',
+  18,
+  'WuDAI',
+  'Wrapped Ulysses DAI Stablecoin'
+);
+export const WuUSDT_SEPOLIA = new NativeToken(
+  ChainId.SEPOLIA,
+  '0x57712Be38A547274182C5A6b15bf2025a63717b8',
+  18,
+  'WuUSDT',
+  'Wrapped Ulysses USDT Stablecoin'
+);
 
 export const USDC_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,

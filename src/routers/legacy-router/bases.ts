@@ -7,6 +7,9 @@ import {
   ITokenProvider,
   USDC_SEPOLIA,
   USDT_SEPOLIA,
+  WuDAI_SEPOLIA,
+  WuUSDC_SEPOLIA,
+  WuUSDT_SEPOLIA,
 } from '../../providers/token-provider';
 import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 
@@ -24,6 +27,9 @@ export const BASES_TO_CHECK_TRADES_AGAINST = (
       USDC_SEPOLIA,
       DAI_SEPOLIA,
       USDT_SEPOLIA,
+      WuUSDC_SEPOLIA,
+      WuDAI_SEPOLIA,
+      WuUSDT_SEPOLIA,
     ],
     [ChainId.ARBITRUM_ONE]: [WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!],
     [ChainId.OPTIMISM]: [],
@@ -101,6 +107,80 @@ export const ADDITIONAL_BASES = async (
         ChainId.MAINNET,
         '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d',
         '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+      )),
+    },
+    [ChainId.SEPOLIA]: {
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0xB948fd6621878C9467814bB113Df4B735FC6D7b1',
+        '0x3f3A23BE22926fDd261A8AFA480EEE667A1Adf69'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x3f3A23BE22926fDd261A8AFA480EEE667A1Adf69',
+        '0xB948fd6621878C9467814bB113Df4B735FC6D7b1'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0xd0970Ff4B2aCD013Ae087dD44001EF1Be60e8060',
+        '0x3f3A23BE22926fDd261A8AFA480EEE667A1Adf69'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x3f3A23BE22926fDd261A8AFA480EEE667A1Adf69',
+        '0xd0970Ff4B2aCD013Ae087dD44001EF1Be60e8060'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x2697Ee41f4cf82192DeD28B221adc7051d0dDE71',
+        '0x4fA0d00564D940bF7e9198bFb61a0EDdb0D6bE82'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x4fA0d00564D940bF7e9198bFb61a0EDdb0D6bE82',
+        '0x2697Ee41f4cf82192DeD28B221adc7051d0dDE71'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x4fA0d00564D940bF7e9198bFb61a0EDdb0D6bE82',
+        '0xCffcd7462Df8725af3B566ee441DcB464FA03DE1'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0xCffcd7462Df8725af3B566ee441DcB464FA03DE1',
+        '0x4fA0d00564D940bF7e9198bFb61a0EDdb0D6bE82'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x0C9437e2C8eeBC797fcA7939240733cbe623Aad5',
+        '0x57712Be38A547274182C5A6b15bf2025a63717b8'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x57712Be38A547274182C5A6b15bf2025a63717b8',
+        '0x0C9437e2C8eeBC797fcA7939240733cbe623Aad5'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x57712Be38A547274182C5A6b15bf2025a63717b8',
+        '0x996AAA029f3A8826C22CcCf6127A16A0e52FC3Da'
+      )),
+      ...(await getBasePairByAddress(
+        tokenProvider,
+        ChainId.SEPOLIA,
+        '0x996AAA029f3A8826C22CcCf6127A16A0e52FC3Da',
+        '0x57712Be38A547274182C5A6b15bf2025a63717b8'
       )),
     },
   };
