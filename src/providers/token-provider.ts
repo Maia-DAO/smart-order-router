@@ -39,9 +39,10 @@ export type TokenAccessor = {
   getAllTokens: () => NativeToken[];
 };
 
+// Sepolia
 export const USDC_SEPOLIA = new NativeToken(
   ChainId.SEPOLIA,
-  '0x6f79350e44a35225870e5fddf55b17574fd77d1a',
+  '0x6F79350e44a35225870e5fDDf55b17574Fd77d1a',
   6,
   'USDC',
   'USDC Stablecoin'
@@ -82,6 +83,7 @@ export const WuUSDT_SEPOLIA = new NativeToken(
   'Wrapped Ulysses USDT Stablecoin'
 );
 
+// Arbitrum
 export const USDC_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,
   '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',

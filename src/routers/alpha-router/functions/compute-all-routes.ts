@@ -174,7 +174,7 @@ export function computeAllRoutes<
         continue;
       }
 
-      const currentTokenIn = _previousTokenOut ? _previousTokenOut : tokenIn;
+      const currentTokenIn = _previousTokenOut ?? tokenIn;
 
       if (!curPool.involvesToken(currentTokenIn)) {
         continue;
@@ -218,7 +218,7 @@ export function computeAllRoutes<
       routes: routes.map(routeToString),
       pools: pools.map(poolToString),
     },
-    `Computed ${routes.length} possible routes for type ${routes[0]?.protocol}.`
+    `Computed ${routes.length} possible routes for ${pools.length} pools for type ${routes[0]?.protocol}.`
   );
 
   return routes;

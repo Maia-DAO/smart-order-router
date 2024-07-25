@@ -62,6 +62,8 @@ export type CandidatePoolsSelections = {
   topByTVLUsingTokenOut: PoolId[];
   topByTVLUsingTokenInSecondHops: PoolId[];
   topByTVLUsingTokenOutSecondHops: PoolId[];
+  // This is required for certain cross-chain routes
+  topByTVLUsingBase: PoolId[];
 };
 
 export type StableGetCandidatePoolsParams = {
@@ -272,6 +274,36 @@ export async function getStableCandidatePools({
     .slice(0, topNWithBaseToken)
     .value();
 
+  const topByTVLUsingBase = _(baseTokens)
+    .flatMap((token: NativeToken) => {
+      return _(subgraphPoolsSorted)
+        .filter((subgraphPool) => {
+          const tokenAddress = token.address.toLowerCase();
+
+          return (
+            (subgraphPool.tokensList.some((token) => token == tokenAddress) ||
+              subgraphPool.wrapper == tokenAddress) &&
+            _(baseTokens).some((baseToken) => {
+              if (baseToken == token) return false;
+              const baseTokenAddress = baseToken.address.toLowerCase();
+
+              return (
+                subgraphPool.tokensList.some(
+                  (token) => token == baseTokenAddress
+                ) || subgraphPool.wrapper == baseTokenAddress
+              );
+            })
+          );
+        })
+        .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
+        .uniqBy((tokenListPool) => tokenListPool.id)
+        .value();
+    })
+    .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
+    .value();
+
+  addToAddressSet(topByTVLUsingBase);
+
   const top2DirectSwapPool = _(subgraphPoolsSorted)
     .filter((subgraphPool) => {
       return (
@@ -435,6 +467,7 @@ export async function getStableCandidatePools({
     ...topByTVLUsingTokenOut,
     ...topByTVLUsingTokenInSecondHops,
     ...topByTVLUsingTokenOutSecondHops,
+    ...topByTVLUsingBase,
   ])
     .compact()
     .uniqBy((pool) => pool.id)
@@ -474,6 +507,7 @@ export async function getStableCandidatePools({
       ),
       top2DirectSwap: top2DirectSwapPool.map(printStableSubgraphPool),
       top2EthQuotePool: top2EthQuoteTokenPool.map(printStableSubgraphPool),
+      topByTVLUsingBase: topByTVLUsingBase.map(printStableSubgraphPool),
     },
     `Stable Candidate Pools`
   );
@@ -535,6 +569,7 @@ export async function getStableCandidatePools({
       topByTVLUsingTokenOut,
       topByTVLUsingTokenInSecondHops,
       topByTVLUsingTokenOutSecondHops,
+      topByTVLUsingBase,
     },
   };
 
@@ -686,6 +721,37 @@ export async function getV3CandidatePools({
     })
     .slice(0, topNDirectSwaps)
     .value();
+
+  const topByTVLUsingBase = _(baseTokens)
+    .flatMap((token: NativeToken) => {
+      return _(subgraphPoolsSorted)
+        .filter((subgraphPool) => {
+          const tokenAddress = token.address.toLowerCase();
+
+          return (
+            (subgraphPool.token0.id == tokenAddress ||
+              subgraphPool.token1.id == tokenAddress) &&
+            _(baseTokens).some((baseToken) => {
+              if (baseToken == token) return false;
+
+              const baseTokenAddress = baseToken.address.toLowerCase();
+
+              return (
+                subgraphPool.token0.id == baseTokenAddress ||
+                subgraphPool.token1.id == baseTokenAddress
+              );
+            })
+          );
+        })
+        .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
+        .uniqBy((tokenListPool) => tokenListPool.id)
+        .slice(0, 10)
+        .value();
+    })
+    .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
+    .value();
+
+  addToAddressSet(topByTVLUsingBase);
 
   if (top2DirectSwapPool.length == 0 && topNDirectSwaps > 0) {
     // If we requested direct swap pools but did not find any in the subgraph query.
@@ -855,6 +921,7 @@ export async function getV3CandidatePools({
     ...topByTVLUsingTokenOut,
     ...topByTVLUsingTokenInSecondHops,
     ...topByTVLUsingTokenOutSecondHops,
+    ...topByTVLUsingBase,
   ])
     .compact()
     .uniqBy((pool) => pool.id)
@@ -892,6 +959,7 @@ export async function getV3CandidatePools({
         topByTVLUsingTokenOutSecondHops.map(printV3SubgraphPool),
       top2DirectSwap: top2DirectSwapPool.map(printV3SubgraphPool),
       top2EthQuotePool: top2EthQuoteTokenPool.map(printV3SubgraphPool),
+      topByTVLUsingBase: topByTVLUsingBase.map(printV3SubgraphPool),
     },
     `V3 Candidate Pools`
   );
@@ -959,6 +1027,7 @@ export async function getV3CandidatePools({
       topByTVLUsingTokenOut,
       topByTVLUsingTokenInSecondHops,
       topByTVLUsingTokenOutSecondHops,
+      topByTVLUsingBase,
     },
   };
 
@@ -1564,6 +1633,7 @@ export async function getV2CandidatePools({
       topByTVLUsingTokenOut,
       topByTVLUsingTokenInSecondHops,
       topByTVLUsingTokenOutSecondHops,
+      topByTVLUsingBase: [],
     },
   };
 
@@ -1735,6 +1805,7 @@ export async function getMixedRouteCandidatePools({
       topByTVLUsingTokenOutSecondHops: buildPoolsBySelection(
         'topByTVLUsingTokenOutSecondHops'
       ),
+      topByTVLUsingBase: buildPoolsBySelection('topByTVLUsingBase'),
     },
   };
 
