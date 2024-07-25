@@ -15,7 +15,7 @@ import { IMulticallProvider } from '../../providers/multicall-provider';
 import {
   DAI_ARBITRUM,
   ITokenProvider,
-  USDC_SEPOLIA,
+  USDC_ARBITRUM,
 } from '../../providers/token-provider';
 import { IV3PoolProvider } from '../../providers/v3/pool-provider';
 import { SWAP_ROUTER_02_ADDRESSES } from '../../util';
@@ -314,7 +314,7 @@ export class LegacyRouter {
         gasModel: {
           estimateGasCost: () => ({
             gasCostInToken: CurrencyAmount.fromRawAmount(quoteToken, 0),
-            gasCostInUSD: CurrencyAmount.fromRawAmount(USDC_SEPOLIA, 0),
+            gasCostInUSD: CurrencyAmount.fromRawAmount(USDC_ARBITRUM, 0),
             gasEstimate: BigNumber.from(0),
           }),
         },

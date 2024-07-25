@@ -10,11 +10,9 @@ import {
 import { ProviderConfig } from '../../../providers/provider';
 import {
   DAI_ARBITRUM,
-  DAI_SEPOLIA,
   USDC_ARBITRUM,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_SEPOLIA,
 } from '../../../providers/token-provider';
 import { IV2PoolProvider } from '../../../providers/v2/pool-provider';
 import {
@@ -38,7 +36,7 @@ import {
 // DAI_AVAX has 18 decimals and comes before USDC_AVAX which has 6 decimals.
 export const usdGasTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
   [ChainId.ARBITRUM_ONE]: [DAI_ARBITRUM, USDC_ARBITRUM, USDT_ARBITRUM],
-  [ChainId.SEPOLIA]: [DAI_SEPOLIA, USDC_SEPOLIA, USDT_SEPOLIA],
+  [ChainId.SEPOLIA]: [USDC_SEPOLIA],
 };
 
 export type L1ToL2GasCosts = {

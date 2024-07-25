@@ -114,12 +114,12 @@ export type MixedRouteGetCandidatePoolsParams = {
 const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
   [ChainId.SEPOLIA]: [
     WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
-    USDC_SEPOLIA,
-    DAI_SEPOLIA,
-    USDT_SEPOLIA,
     WuUSDC_SEPOLIA,
     WuDAI_SEPOLIA,
     WuUSDT_SEPOLIA,
+    USDC_SEPOLIA,
+    DAI_SEPOLIA,
+    USDT_SEPOLIA,
   ],
   [ChainId.ARBITRUM_ONE]: [
     DAI_ARBITRUM,
