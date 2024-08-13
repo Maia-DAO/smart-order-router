@@ -15,7 +15,6 @@ export const QUOTER_V2_ADDRESSES: AddressMap = {
 };
 
 export const UNIVERSAL_QUOTER_ADDRESSES: AddressMap = {
-  // TODO: Add Chains
   ...constructSameAddressMap('0xE8d9dfF5807c6F832CBC41322aE4ca625f99d34d'),
   [ChainId.SEPOLIA]: '0x039e7Db104500818f414dd65860480A4ed41fB20',
 };

@@ -27,15 +27,18 @@ type RawStableSubgraphPool = {
 
 export const printStableSubgraphPool = (s: StableSubgraphPool) => `${s.id}`;
 
+// TODO: Check if using production subgraph is needed: https://docs.balancer.fi/reference/subgraph/#v2-subgraphs
 const BALANCER_SUBGRAPH_URL_BY_CHAIN: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]:
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+    // 'https://api.studio.thegraph.com/query/75376/balancer-v2/version/latest',
+    '',
   [ChainId.SEPOLIA]:
     'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
   [ChainId.OPTIMISM]:
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
+    // 'https://api.studio.thegraph.com/query/75376/balancer-optimism-v2/version/latest',
+    '',
   [ChainId.ARBITRUM_ONE]:
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
+    'https://api.studio.thegraph.com/query/75376/balancer-arbitrum-v2/version/latest',
 };
 
 const PAGE_SIZE = 1000; // 1k is max possible query size from subgraph.
