@@ -2,9 +2,9 @@ import retry from 'async-retry';
 import Timeout from 'await-timeout';
 import { gql, GraphQLClient } from 'graphql-request';
 import _ from 'lodash';
-import { ChainId, NativeToken } from 'maia-core-sdk';
+import { BalancerAddresses, ChainId, NativeToken } from 'maia-core-sdk';
 
-import { computeVaultAddress, VAULT_FACTORY_ADDRESS } from 'hermes-v2-sdk';
+import { computeVaultAddress } from 'hermes-v2-sdk';
 import { log } from '../../util';
 import { ProviderConfig } from '../provider';
 
@@ -59,6 +59,8 @@ export interface IStableSubgraphProvider {
 
 export class StableSubgraphProvider implements IStableSubgraphProvider {
   private client: GraphQLClient;
+  private factoryAddress: string;
+  private initCodeHash: string;
 
   constructor(
     private chainId: ChainId,
@@ -70,6 +72,18 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
     if (!subgraphUrl) {
       throw new Error(`No subgraph url for chain id: ${this.chainId}`);
     }
+    const _factoryAddress =
+      BalancerAddresses[this.chainId]?.ComposableStablePoolWrapperFactory;
+    const _initCodeHash =
+      BalancerAddresses[this.chainId]?.ComposableStablePoolWrapperInitCodeHash;
+    if (!_factoryAddress || !_initCodeHash) {
+      throw new Error(
+        `No factory address or init code hash for chain id: ${this.chainId}`
+      );
+    }
+
+    this.factoryAddress = _factoryAddress;
+    this.initCodeHash = _initCodeHash;
     this.client = new GraphQLClient(subgraphUrl);
   }
 
@@ -186,8 +200,9 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
       .map((pool) => {
         const totalSharesNumber = Number(pool.totalShares);
         const wrapper = computeVaultAddress({
-          factoryAddress: VAULT_FACTORY_ADDRESS,
+          factoryAddress: this.factoryAddress,
           underlying: pool.id.substring(0, 42),
+          initCodeHash: this.initCodeHash,
         });
 
         return {
