@@ -46,7 +46,6 @@ import {
   SwapRouterProvider,
   TokenPropertiesProvider,
   UniswapMulticallProvider,
-  URISubgraphProvider,
   V3SubgraphProviderWithFallBacks,
 } from '../../providers';
 import {
@@ -85,12 +84,7 @@ import {
 import { Erc20__factory } from '../../types/other/factories/Erc20__factory';
 import { SWAP_ROUTER_02_ADDRESSES, WRAPPED_NATIVE_CURRENCY } from '../../util';
 import { CurrencyAmount } from '../../util/amounts';
-import {
-  ChainName,
-  ID_TO_CHAIN_ID,
-  ID_TO_NETWORK_NAME,
-  MIXED_SUPPORTED,
-} from '../../util/chains';
+import { ID_TO_CHAIN_ID, MIXED_SUPPORTED } from '../../util/chains';
 import {
   getHighestLiquidityV3NativePool,
   getHighestLiquidityV3USDPool,
@@ -631,7 +625,7 @@ export class AlphaRouter
       );
     this.portionProvider = portionProvider ?? new PortionProvider();
 
-    const chainName = ID_TO_NETWORK_NAME(chainId);
+    // const chainName = ID_TO_NETWORK_NAME(chainId);
 
     if (v3SubgraphProvider) {
       this.v3SubgraphProvider = v3SubgraphProvider;
@@ -639,14 +633,16 @@ export class AlphaRouter
       this.v3SubgraphProvider = new V3SubgraphProviderWithFallBacks([
         new CachingV3SubgraphProvider(
           chainId,
-          chainName === ChainName.SEPOLIA
-            ? new V3SubgraphProvider(chainId)
-            : new URISubgraphProvider(
-                chainId,
-                `https://cloudflare-ipfs.com/ipns/api.uniswap.org/v1/pools/v3/${chainName}.json`,
-                undefined,
-                0
-              ),
+          new V3SubgraphProvider(chainId),
+          // ! TODO: Re-add if uniswap enables URISubgraphProvider endpoint
+          // chainName === ChainName.SEPOLIA
+          //   ? new V3SubgraphProvider(chainId)
+          //   : new URISubgraphProvider(
+          //       chainId,
+          //       `https://cloudflare-ipfs.com/ipns/api.uniswap.org/v1/pools/v3/${chainName}.json`,
+          //       undefined,
+          //       0
+          //     ),
           new NodeJSCache(new NodeCache({ stdTTL: 300, useClones: false }))
         ),
         new StaticV3SubgraphProvider(chainId, this.v3PoolProvider),

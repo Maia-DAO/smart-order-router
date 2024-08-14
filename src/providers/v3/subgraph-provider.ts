@@ -45,12 +45,11 @@ export const printV2SubgraphPool = (s: V2SubgraphPool) =>
   `${s.token0.id}/${s.token1.id}`;
 
 const SUBGRAPH_URL_BY_CHAIN: { [chainId in ChainId]?: string } = {
-  [ChainId.MAINNET]:
-    'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
-  [ChainId.OPTIMISM]:
-    'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
+  [ChainId.MAINNET]: '',
+  [ChainId.OPTIMISM]: '',
   [ChainId.ARBITRUM_ONE]:
-    'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-minimal',
+    // 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-minimal',
+    'https://gateway.thegraph.com/api/0ae45f0bf40ae2e73119b44ccd755967/subgraphs/id/FbCGRftH4a3yZugY7TnbYgPJVEv2LvMT6oF1fxPe9aJM',
   [ChainId.SEPOLIA]:
     'https://subgraph.satsuma-prod.com/917209a9d9b8/maias-team--1290408/sepolia-v3/api',
 };
