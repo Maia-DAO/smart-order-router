@@ -1,6 +1,6 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "description": "Hermes Smart Order Router",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -47,11 +47,11 @@
     "ethers": "^5.7.2",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
-    "hermes-swap-router-sdk": "^0.0.46",
-    "hermes-universal-router-sdk": "^0.0.70",
-    "hermes-v2-sdk": "^0.0.82",
+    "hermes-swap-router-sdk": "^0.0.48",
+    "hermes-universal-router-sdk": "^0.0.71",
+    "hermes-v2-sdk": "^0.0.83",
     "lodash": "^4.17.21",
-    "maia-core-sdk": "^1.0.39",
+    "maia-core-sdk": "^1.0.40",
     "mnemonist": "^0.38.3",
     "node-cache": "^5.1.2",
     "stats-lite": "^2.2.0"
