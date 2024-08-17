@@ -1610,6 +1610,7 @@ export class AlphaRouter
       routingConfig,
       this.portionProvider,
       v3GasModel,
+      stableGasModel,
       swapConfig
     );
   }
@@ -1853,6 +1854,7 @@ export class AlphaRouter
       routingConfig,
       this.portionProvider,
       v3GasModel,
+      stableGasModel,
       swapConfig
     );
 

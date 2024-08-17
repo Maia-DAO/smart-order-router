@@ -4095,10 +4095,10 @@ hermes-swap-router-sdk@^0.0.50:
     hermes-v2-sdk "0.0.85"
     maia-core-sdk "1.0.42"
 
-hermes-universal-router-sdk@^0.0.73:
-  version "0.0.73"
-  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.73.tgz#76955a30edd713a463d74e68aa83d7fe650ea955"
-  integrity sha512-VDW9BXsIpMC+xIZ5i/vxAY8jW2rI/PXDU2dJ2KTYMCQk5GMJACjdf7Cdas36RqHaw2iETP2+dvp5CqpO6fEFHw==
+hermes-universal-router-sdk@^0.0.74:
+  version "0.0.74"
+  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.74.tgz#64ac88dfd40f7b242c737330b55d600b74b0604d"
+  integrity sha512-2iEF6G1G4sZohohM0a2rpe5RbheKR6rLVj9xv8f2d6OkSwO+1KAkDVnqeIjdny7e3UTUg6+TebsqpHOv9lU+dQ==
   dependencies:
     "@uniswap/permit2-sdk" "^1.3.0"
     "@uniswap/universal-router" "1.6.0"
