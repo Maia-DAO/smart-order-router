@@ -107,7 +107,7 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
         pools(
           first: $pageSize
           ${blockNumber ? `block: { number: ${blockNumber} }` : ``}
-          where: { id_gt: $id, poolType: "ComposableStable", poolTypeVersion: 5 }
+          where: { id_gt: $id, poolType: "ComposableStable", poolTypeVersion_in: [5, 6] }
         ) {
           id
           totalShares
