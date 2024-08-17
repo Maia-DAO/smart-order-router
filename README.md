@@ -185,6 +185,14 @@ Total ticks crossed: 7
 ./bin/cli quote --tokenIn 0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9 --tokenOut 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 --amount 20000 --exactIn --minSplits 1 --router alpha --chainId 42161 --protocols v3,bal,mixed --debug
 ```
 
+```
+./bin/cli quote --tokenIn 0x9F0DD7B477dE824c6b2f7EE141fC8656C6EA0582 --tokenOut 0xD4FcbADA835D5A2814Db6D4521a668ab0773D3f3 --amount 1 --exactIn --minSplits 1 --router alpha --chainId 42161 --protocols bal --debug
+```
+
+```
+./bin/cli quote --tokenIn 0x18b9b9897f0c5A7f2D9424C058211C2EF218F1A3 --tokenOut 0xD4FcbADA835D5A2814Db6D4521a668ab0773D3f3 --amount 1 --exactIn --minSplits 1 --router alpha --chainId 42161 --protocols bal --debug
+```
+
 ## Arbitrum-Rinkeby
 
 ```

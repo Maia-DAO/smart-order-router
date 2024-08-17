@@ -39,7 +39,7 @@ const BALANCER_SUBGRAPH_URL_BY_CHAIN: { [chainId in ChainId]?: string } = {
     '',
   [ChainId.ARBITRUM_ONE]:
     // 'https://api.studio.thegraph.com/query/75376/balancer-arbitrum-v2/version/latest',
-    'https://gateway-arbitrum.network.thegraph.com/api/0ae45f0bf40ae2e73119b44ccd755967/subgraphs/id/C4ayEZP2yTXRAB8vSaTrgN4m9anTe9Mdm2ViyiAuV9TV',
+    'https://gateway-arbitrum.network.thegraph.com/api/0ae45f0bf40ae2e73119b44ccd755967/subgraphs/id/98cQDy6tufTJtshDCuhh9z2kWXsQWBHVh2bqnLHsGAeS',
 };
 
 const PAGE_SIZE = 1000; // 1k is max possible query size from subgraph.
