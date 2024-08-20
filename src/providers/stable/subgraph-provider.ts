@@ -197,15 +197,7 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
         // TODO: Filter pools with low tvl
         // if (parseFloat(pool.totalValueLockedETH) < 0.01) return false;
 
-        return (
-          parseInt(pool.totalShares) > 0 &&
-          // TODO: Re-add these pools, it is leading to incorrect routes between USDC and USDT
-          pool.id.toLowerCase() !==
-            '0xf890360473c12d8015da8dbf7af11da87337a065000000000000000000000570' &&
-          // TODO: Re-add these pools, it is leading to incorrect routes between USDC and USDT
-          pool.id.toLowerCase() !==
-            '0x423a1323c871abc9d89eb06855bf5347048fc4a5000000000000000000000496'
-        );
+        return parseInt(pool.totalShares) > 0;
       })
       .map((pool) => {
         const totalSharesNumber = Number(pool.totalShares);
