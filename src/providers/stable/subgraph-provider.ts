@@ -193,15 +193,17 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
     );
 
     const poolsSanitized = pools
-      .filter(
-        (pool) =>
-          parseInt(pool.totalShares) > 0 ||
-          // TODO: Re-add this pool, it is leading to incorrect routes between USDC and USDT
-          pool.id !==
-            '0xf890360473c12d8015da8dbf7af11da87337a065000000000000000000000570'
+      .filter((pool) => {
         // TODO: Filter pools with low tvl
-        // || parseFloat(pool.totalValueLockedETH) > 0.01
-      )
+        // if (parseFloat(pool.totalValueLockedETH) < 0.01) return false;
+
+        return (
+          parseInt(pool.totalShares) > 0 &&
+          // TODO: Re-add this pool, it is leading to incorrect routes between USDC and USDT
+          pool.id.toLowerCase() !==
+            '0xf890360473c12d8015da8dbf7af11da87337a065000000000000000000000570'
+        );
+      })
       .map((pool) => {
         const totalSharesNumber = Number(pool.totalShares);
         const wrapper = computeVaultAddress({
