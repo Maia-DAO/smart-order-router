@@ -1,5 +1,5 @@
 import { Protocol, TPool } from 'hermes-swap-router-sdk';
-import { Pair, Pool } from 'hermes-v2-sdk';
+import { ComposableStablePool, Pair, Pool } from 'hermes-v2-sdk';
 import _ from 'lodash';
 import { Percent } from 'maia-core-sdk';
 
@@ -19,22 +19,30 @@ export const routeToString = (route: AllRoutes): string => {
   const tokenPath = _.map(tokens, (token) => `${token.symbol}`);
   const pools = route.protocol === Protocol.V2 ? route.pairs : route.pools;
 
-  // TODO: Fix this - Add support for BalancerVault and ERC4626 vaults
   const poolFeePath = _.map(pools, (pool) => {
-    return `${
-      pool instanceof Pool
-        ? ` -- ${pool.fee / 10000}% [${Pool.getAddress(
-            pool.token0,
-            pool.token1,
-            pool.fee,
-            undefined,
-            V3_CORE_FACTORY_ADDRESSES[pool.chainId]
-          )}]`
-        : ` -- [${Pair.getAddress(
-            (pool as Pair).token0,
-            (pool as Pair).token1
-          )}]`
-    } --> `;
+    if (pool instanceof Pool) {
+      return ` -- ${pool.fee / 10000}% [${Pool.getAddress(
+        pool.token0,
+        pool.token1,
+        pool.fee,
+        undefined,
+        V3_CORE_FACTORY_ADDRESSES[pool.chainId]
+      )}]`;
+    }
+
+    if (pool instanceof Pair) {
+      return ` -- [${Pair.getAddress(
+        (pool as Pair).token0,
+        (pool as Pair).token1
+      )}]`;
+    }
+
+    if (pool instanceof ComposableStablePool) {
+      return ` -- [${(pool as ComposableStablePool).pool.id}]`;
+    }
+
+    // TODO: Fix this - Add support for ERC4626 vaults
+    return 'Vault';
   });
 
   for (let i = 0; i < tokenPath.length; i++) {
