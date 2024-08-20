@@ -199,9 +199,12 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
 
         return (
           parseInt(pool.totalShares) > 0 &&
-          // TODO: Re-add this pool, it is leading to incorrect routes between USDC and USDT
+          // TODO: Re-add these pools, it is leading to incorrect routes between USDC and USDT
           pool.id.toLowerCase() !==
-            '0xf890360473c12d8015da8dbf7af11da87337a065000000000000000000000570'
+            '0xf890360473c12d8015da8dbf7af11da87337a065000000000000000000000570' &&
+          // TODO: Re-add these pools, it is leading to incorrect routes between USDC and USDT
+          pool.id.toLowerCase() !==
+            '0x423a1323c871abc9d89eb06855bf5347048fc4a5000000000000000000000496'
         );
       })
       .map((pool) => {
