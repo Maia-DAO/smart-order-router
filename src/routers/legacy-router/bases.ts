@@ -8,6 +8,10 @@ import {
   USDC_SEPOLIA,
   USDT_SEPOLIA,
   WuDAI_SEPOLIA,
+  WuL1sUSDC_ARBITRUM,
+  WuL1sUSDT_ARBITRUM,
+  WuOPsETH_ARBITRUM,
+  WuOPsUSDC_ARBITRUM,
   WuUSDC_SEPOLIA,
   WuUSDT_SEPOLIA,
 } from '../../providers/token-provider';
@@ -31,7 +35,13 @@ export const BASES_TO_CHECK_TRADES_AGAINST = (
       DAI_SEPOLIA,
       USDT_SEPOLIA,
     ],
-    [ChainId.ARBITRUM_ONE]: [WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!],
+    [ChainId.ARBITRUM_ONE]: [
+      WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!,
+      WuOPsETH_ARBITRUM,
+      WuOPsUSDC_ARBITRUM,
+      WuL1sUSDC_ARBITRUM,
+      WuL1sUSDT_ARBITRUM,
+    ],
     [ChainId.OPTIMISM]: [],
   };
 };

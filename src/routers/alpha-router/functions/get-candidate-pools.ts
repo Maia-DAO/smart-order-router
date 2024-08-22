@@ -24,6 +24,10 @@ import {
   USDT_SEPOLIA,
   WBTC_ARBITRUM,
   WuDAI_SEPOLIA,
+  WuL1sUSDC_ARBITRUM,
+  WuL1sUSDT_ARBITRUM,
+  WuOPsETH_ARBITRUM,
+  WuOPsUSDC_ARBITRUM,
   WuUSDC_SEPOLIA,
   WuUSDT_SEPOLIA,
 } from '../../../providers/token-provider';
@@ -124,6 +128,10 @@ const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
     USDT_SEPOLIA,
   ],
   [ChainId.ARBITRUM_ONE]: [
+    WuOPsETH_ARBITRUM,
+    WuOPsUSDC_ARBITRUM,
+    WuL1sUSDC_ARBITRUM,
+    WuL1sUSDT_ARBITRUM,
     DAI_ARBITRUM,
     USDC_ARBITRUM,
     WBTC_ARBITRUM,

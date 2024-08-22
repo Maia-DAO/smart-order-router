@@ -112,6 +112,34 @@ export const DAI_ARBITRUM = new NativeToken(
   'DAI',
   'Dai Stablecoin'
 );
+export const WuOPsETH_ARBITRUM = new NativeToken(
+  ChainId.SEPOLIA,
+  '0x0B52D7bc036f6F74d8eA5Ea02A9fa4CDd12EA784',
+  18,
+  'WuL1s-USDT',
+  'Wrapped Ulysses Optimism Stack ETH'
+);
+export const WuOPsUSDC_ARBITRUM = new NativeToken(
+  ChainId.SEPOLIA,
+  '0x9fa578DBf15C86b1eE599aa4507251311fd6FD37',
+  18,
+  'WuOPs-USDC',
+  'Wrapped Ulysses Optimism Stack USDC'
+);
+export const WuL1sUSDC_ARBITRUM = new NativeToken(
+  ChainId.SEPOLIA,
+  '0xD4FcbADA835D5A2814Db6D4521a668ab0773D3f3',
+  18,
+  'WuL1s-USDC',
+  'Wrapped Ulysses Alt L1 USDC'
+);
+export const WuL1sUSDT_ARBITRUM = new NativeToken(
+  ChainId.SEPOLIA,
+  '0x6284885cC2b1934A53E92d01BF55995314190C19',
+  18,
+  'WuL1s-USDT',
+  'Wrapped Ulysses Alt L1 USDT'
+);
 
 export const ARB_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,
