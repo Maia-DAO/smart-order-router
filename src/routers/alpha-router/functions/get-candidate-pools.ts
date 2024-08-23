@@ -128,6 +128,7 @@ const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
     USDT_SEPOLIA,
   ],
   [ChainId.ARBITRUM_ONE]: [
+    WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!,
     WuOPsETH_ARBITRUM,
     WuOPsUSDC_ARBITRUM,
     WuL1sUSDC_ARBITRUM,
@@ -303,10 +304,9 @@ export async function getStableCandidatePools({
             })
           );
         })
-        .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
-        .uniqBy((tokenListPool) => tokenListPool.id)
         .value();
     })
+    .uniqBy((tokenListPool) => tokenListPool.id)
     .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
     .value();
 
@@ -730,6 +730,8 @@ export async function getV3CandidatePools({
     .slice(0, topNDirectSwaps)
     .value();
 
+  const topByTVLUsingBaseConfig = 10;
+
   const topByTVLUsingBase = _(baseTokens)
     .flatMap((token: NativeToken) => {
       return _(subgraphPoolsSorted)
@@ -753,9 +755,11 @@ export async function getV3CandidatePools({
         })
         .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
         .uniqBy((tokenListPool) => tokenListPool.id)
-        .slice(0, 10)
+        .slice(0, topByTVLUsingBaseConfig)
         .value();
     })
+    .uniqBy((tokenListPool) => tokenListPool.id)
+    .slice(0, topByTVLUsingBaseConfig)
     .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
     .value();
 
