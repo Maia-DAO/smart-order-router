@@ -730,7 +730,7 @@ export async function getV3CandidatePools({
     .slice(0, topNDirectSwaps)
     .value();
 
-  const topByTVLUsingBaseConfig = 10;
+  const topByTVLUsingBaseConfig = 20;
 
   const topByTVLUsingBase = _(baseTokens)
     .flatMap((token: NativeToken) => {

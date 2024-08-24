@@ -4085,33 +4085,33 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hermes-swap-router-sdk@^0.0.52:
-  version "0.0.52"
-  resolved "https://registry.yarnpkg.com/hermes-swap-router-sdk/-/hermes-swap-router-sdk-0.0.52.tgz#bf23b29a60b43c1a3db9002c979051508e5a6fd1"
-  integrity sha512-5ms3dgSLjGoxqSkOFhBIqMHbPPneG+oCz986F9I0eeM1LGmavjpBCPVbmDTUtlYMTkd58pwNadBkmNJyWd88cQ==
+hermes-swap-router-sdk@^0.0.53:
+  version "0.0.53"
+  resolved "https://registry.yarnpkg.com/hermes-swap-router-sdk/-/hermes-swap-router-sdk-0.0.53.tgz#d2d6c614fdc1d9dc1ea3771042879afb1096cde8"
+  integrity sha512-QnfOSooF2Bm4z21WpwE5VSRv86FC2cT8eLB77U+9NZa8Ucu9aNyHS0gjA6UWSqCWC7PVpN5cW1cpwqEPBup67g==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@uniswap/swap-router-contracts" "^1.3.0"
-    hermes-v2-sdk "0.0.86"
+    hermes-v2-sdk "0.0.87"
     maia-core-sdk "1.0.43"
 
-hermes-universal-router-sdk@^0.0.80:
-  version "0.0.80"
-  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.80.tgz#5301e37c73fdad62f7c97a080263cd582f997a48"
-  integrity sha512-L1mc4e6iUFh5bW/WkMzk5xF+1JPzzqjndSJ2h+wHQyVi3u9lvIEfcjpzlfy82FgG2BBfhK8AzvCt8iW9qBKaww==
+hermes-universal-router-sdk@^0.0.81:
+  version "0.0.81"
+  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.81.tgz#3a1982111bc557bdaafb6a925dbf1af07da02a33"
+  integrity sha512-R5G7C+VRDr1x1MMldSw0v1n2neAzegwjhQP6+62V+7siGOTIE32tocFYO27gQ13Dcg50/nWNwpcUuCYasIcMGg==
   dependencies:
     "@uniswap/permit2-sdk" "^1.3.0"
     "@uniswap/universal-router" "1.6.0"
     bignumber.js "^9.0.2"
     ethers "^5.7.0"
-    hermes-swap-router-sdk "^0.0.52"
-    hermes-v2-sdk "0.0.86"
+    hermes-swap-router-sdk "^0.0.53"
+    hermes-v2-sdk "0.0.87"
     maia-core-sdk "1.0.43"
 
-hermes-v2-sdk@0.0.86, hermes-v2-sdk@^0.0.86:
-  version "0.0.86"
-  resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.86.tgz#bfdc803552c1fb938faa348dab7902b15b96d512"
-  integrity sha512-H1elI+z0vbL0Oyuc7PSIAPHGQWscqGhPltxbYgwGY011BVrGmJ7D5z8n5MdYpYypj+UWR6vWcPVTWld6rPcG6g==
+hermes-v2-sdk@0.0.87, hermes-v2-sdk@^0.0.87:
+  version "0.0.87"
+  resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.87.tgz#0b926f66de78c9c5285099a26a4e774d27980ba5"
+  integrity sha512-Nfz4s6I+O6FqTfazwrLvS0to0fzbhBExHQhkY/mofHB7VtndVPVnIb9UFRDL4nNsk+0D5ApNz7BUbVbl4JQlsw==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/solidity" "^5.7.0"
