@@ -140,6 +140,16 @@ const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
   ],
 };
 
+const crossChainBaseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
+  [ChainId.SEPOLIA]: [WuUSDC_SEPOLIA, WuDAI_SEPOLIA, WuUSDT_SEPOLIA],
+  [ChainId.ARBITRUM_ONE]: [
+    WuOPsETH_ARBITRUM,
+    WuOPsUSDC_ARBITRUM,
+    WuL1sUSDC_ARBITRUM,
+    WuL1sUSDT_ARBITRUM,
+  ],
+};
+
 class SubcategorySelectionPools<SubgraphPool> {
   constructor(
     public pools: SubgraphPool[],
@@ -283,25 +293,17 @@ export async function getStableCandidatePools({
     .slice(0, topNWithBaseToken)
     .value();
 
-  const topByTVLUsingBase = _(baseTokens)
+  const crossChainBaseTokens = crossChainBaseTokensByChain[chainId] ?? [];
+
+  const topByTVLUsingBase = _(crossChainBaseTokens)
     .flatMap((token: NativeToken) => {
       return _(subgraphPoolsSorted)
         .filter((subgraphPool) => {
           const tokenAddress = token.address.toLowerCase();
 
           return (
-            (subgraphPool.tokensList.some((token) => token == tokenAddress) ||
-              subgraphPool.wrapper == tokenAddress) &&
-            _(baseTokens).some((baseToken) => {
-              if (baseToken == token) return false;
-              const baseTokenAddress = baseToken.address.toLowerCase();
-
-              return (
-                subgraphPool.tokensList.some(
-                  (token) => token == baseTokenAddress
-                ) || subgraphPool.wrapper == baseTokenAddress
-              );
-            })
+            subgraphPool.tokensList.some((token) => token == tokenAddress) ||
+            subgraphPool.wrapper == tokenAddress
           );
         })
         .value();
@@ -730,27 +732,18 @@ export async function getV3CandidatePools({
     .slice(0, topNDirectSwaps)
     .value();
 
+  const crossChainBaseTokens = crossChainBaseTokensByChain[chainId] ?? [];
   const topByTVLUsingBaseConfig = 20;
 
-  const topByTVLUsingBase = _(baseTokens)
+  const topByTVLUsingBase = _(crossChainBaseTokens)
     .flatMap((token: NativeToken) => {
       return _(subgraphPoolsSorted)
         .filter((subgraphPool) => {
           const tokenAddress = token.address.toLowerCase();
 
           return (
-            (subgraphPool.token0.id == tokenAddress ||
-              subgraphPool.token1.id == tokenAddress) &&
-            _(baseTokens).some((baseToken) => {
-              if (baseToken == token) return false;
-
-              const baseTokenAddress = baseToken.address.toLowerCase();
-
-              return (
-                subgraphPool.token0.id == baseTokenAddress ||
-                subgraphPool.token1.id == baseTokenAddress
-              );
-            })
+            subgraphPool.token0.id == tokenAddress ||
+            subgraphPool.token1.id == tokenAddress
           );
         })
         .sortBy((tokenListPool) => -tokenListPool.tvlUSD)
