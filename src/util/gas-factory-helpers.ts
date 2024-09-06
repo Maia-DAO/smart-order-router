@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import compress from 'brotli/compress';
+import { compress } from 'brotli-wasm';
 import { Protocol } from 'hermes-swap-router-sdk';
 import { FeeAmount, Pair, Pool, TradeType } from 'hermes-v2-sdk';
 import JSBI from 'jsbi';
@@ -188,9 +188,7 @@ export function getGasCostInNativeCurrency(
 export function getArbitrumBytes(data: string): BigNumber {
   if (data == '') return BigNumber.from(0);
   const compressed = compress(Buffer.from(data.replace('0x', ''), 'hex'), {
-    mode: 0,
     quality: 1,
-    lgwin: 22,
   });
   // TODO: This is a rough estimate of the compressed size
   // Brotli 0 should be used, but this brotli library doesn't support it
