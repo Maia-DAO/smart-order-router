@@ -113,7 +113,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       let gasUsedL1OnL2 = BigNumber.from(0);
       const opStackChains = [ChainId.OPTIMISM];
       if (opStackChains.includes(chainId)) {
-        [l1Used, l1FeeInWei] = this.calculateOptimismToL1SecurityFee(
+        [l1Used, l1FeeInWei] = await this.calculateOptimismToL1SecurityFee(
           route,
           swapOptions,
           l2GasData as OptimismGasData,
@@ -121,7 +121,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
         );
       } else if (chainId == ChainId.ARBITRUM_ONE) {
         [l1Used, l1FeeInWei, gasUsedL1OnL2] =
-          this.calculateArbitrumToL1SecurityFee(
+          await this.calculateArbitrumToL1SecurityFee(
             route,
             swapOptions,
             l2GasData as ArbitrumGasData,
@@ -467,12 +467,12 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
    * To avoid having a call to optimism's L1 security fee contract for every route and amount combination,
    * we replicate the gas cost accounting here.
    */
-  private calculateOptimismToL1SecurityFee(
+  private async calculateOptimismToL1SecurityFee(
     routes: BaseRouteWithValidQuote[],
     swapConfig: SwapOptionsUniversalRouter,
     gasData: OptimismGasData,
     chainId: ChainId
-  ): [BigNumber, BigNumber] {
+  ): Promise<[BigNumber, BigNumber]> {
     const { l1BaseFee, scalar, decimals, overhead } = gasData;
 
     const route: BaseRouteWithValidQuote = routes[0]!;
@@ -492,7 +492,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       swapConfig,
       ChainId.OPTIMISM
     ).calldata;
-    const l1GasUsed = getL2ToL1GasUsed(data, overhead, chainId);
+    const l1GasUsed = await getL2ToL1GasUsed(data, overhead, chainId);
     // l1BaseFee is L1 Gas Price on etherscan
     const l1Fee = l1GasUsed.mul(l1BaseFee);
     const unscaled = l1Fee.mul(scalar);
@@ -503,12 +503,12 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
     return [l1GasUsed, scaled];
   }
 
-  private calculateArbitrumToL1SecurityFee(
+  private async calculateArbitrumToL1SecurityFee(
     routes: BaseRouteWithValidQuote[],
     swapConfig: SwapOptionsUniversalRouter,
     gasData: ArbitrumGasData,
     chainId: ChainId
-  ): [BigNumber, BigNumber, BigNumber] {
+  ): Promise<[BigNumber, BigNumber, BigNumber]> {
     const route: BaseRouteWithValidQuote = routes[0]!;
 
     const amountToken =
@@ -527,6 +527,6 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       swapConfig,
       ChainId.ARBITRUM_ONE
     ).calldata;
-    return calculateArbitrumToL1FeeFromCalldata(data, gasData, chainId);
+    return await calculateArbitrumToL1FeeFromCalldata(data, gasData, chainId);
   }
 }
