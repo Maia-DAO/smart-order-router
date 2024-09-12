@@ -812,6 +812,7 @@ export class AlphaRouter
           status: SwapToRatioStatus.NO_SWAP_NEEDED,
         };
       }
+
       swap = await this.route(
         amountToSwap,
         outputBalance.currency,
@@ -821,7 +822,8 @@ export class AlphaRouter
           ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(this.chainId),
           ...routingConfig,
           /// @dev We do not want to query for mixedRoutes for routeToRatio as they are not supported
-          /// [Protocol.V3, Protocol.V2] will make sure we only query for V3 and V2
+          /// [Protocol.V3] will make sure we only query for V3
+          /// We can add Balancer after adding support for encoding quotes/routes in UniversalRouter SDK
           protocols: [Protocol.V3],
         }
       );
