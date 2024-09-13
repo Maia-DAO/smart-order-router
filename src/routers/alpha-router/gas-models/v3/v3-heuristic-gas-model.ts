@@ -73,8 +73,11 @@ import {
  * @class V3HeuristicGasModelFactory
  */
 export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
-  constructor() {
+  private isBowser: boolean = true;
+
+  constructor(_isBrowser?: boolean) {
     super();
+    if (!_isBrowser) this.isBowser = false;
   }
 
   public async buildGasModel({
@@ -492,7 +495,12 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       swapConfig,
       ChainId.OPTIMISM
     ).calldata;
-    const l1GasUsed = await getL2ToL1GasUsed(data, overhead, chainId);
+    const l1GasUsed = await getL2ToL1GasUsed(
+      data,
+      overhead,
+      chainId,
+      this.isBowser
+    );
     // l1BaseFee is L1 Gas Price on etherscan
     const l1Fee = l1GasUsed.mul(l1BaseFee);
     const unscaled = l1Fee.mul(scalar);
@@ -527,6 +535,11 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
       swapConfig,
       ChainId.ARBITRUM_ONE
     ).calldata;
-    return await calculateArbitrumToL1FeeFromCalldata(data, gasData, chainId);
+    return await calculateArbitrumToL1FeeFromCalldata(
+      data,
+      gasData,
+      chainId,
+      this.isBowser
+    );
   }
 }
