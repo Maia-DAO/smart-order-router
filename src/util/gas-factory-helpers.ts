@@ -1,10 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import brotliPromise from 'brotli-wasm';
 import { Protocol } from 'hermes-swap-router-sdk';
 import { FeeAmount, Pair, Pool, TradeType } from 'hermes-v2-sdk';
 import JSBI from 'jsbi';
 import _ from 'lodash';
 import { ChainId, NativeToken } from 'maia-core-sdk';
+import * as zlib from 'zlib';
 
 import { IV2PoolProvider } from '../providers';
 import { IPortionProvider } from '../providers/portion-provider';
@@ -27,7 +27,6 @@ import {
   usdGasTokensByChain,
 } from '../routers';
 import { CurrencyAmount, WRAPPED_NATIVE_CURRENCY, log } from '../util';
-
 import { buildTrade } from './methodParameters';
 
 export async function getV2NativePool(
@@ -192,21 +191,28 @@ export async function getArbitrumBytes(
   isBowser: boolean
 ): Promise<BigNumber> {
   if (data == '') return BigNumber.from(0);
-  if (!brotli) {
-    if (isBowser) {
-      brotli = await brotliPromise; // Import is async in browsers due to wasm requirements!
-    } else {
-      brotli = brotliPromise;
-    }
-  }
-  const compressed = brotli.compress(
-    Buffer.from(data.replace('0x', ''), 'hex'),
-    {
-      quality: 0,
-    }
-  );
 
-  return BigNumber.from(compressed.length).mul(120).div(100);
+  const buffer = Buffer.from(data.replace('0x', ''), 'hex');
+
+  let compressed;
+  if (isBowser) {
+    if (!brotli) {
+      // Import is async in browsers due to wasm requirements!
+      brotli = await import('brotli-wasm').then((m) => m.default);
+    }
+    compressed = brotli.compress(buffer, {
+      quality: 0,
+    });
+  } else {
+    // In Node.js environments, use zlib
+    compressed = zlib.brotliCompressSync(buffer, {
+      params: {
+        [zlib.constants.BROTLI_PARAM_QUALITY]: 0,
+      },
+    });
+  }
+
+  return BigNumber.from(compressed.length);
 }
 
 export async function calculateArbitrumToL1FeeFromCalldata(

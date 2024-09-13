@@ -129,10 +129,6 @@ const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
   ],
   [ChainId.ARBITRUM_ONE]: [
     WRAPPED_NATIVE_CURRENCY[ChainId.ARBITRUM_ONE]!,
-    WuOPsETH_ARBITRUM,
-    WuOPsUSDC_ARBITRUM,
-    WuL1sUSDC_ARBITRUM,
-    WuL1sUSDT_ARBITRUM,
     DAI_ARBITRUM,
     USDC_ARBITRUM,
     WBTC_ARBITRUM,
