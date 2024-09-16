@@ -1,9 +1,9 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "description": "Hermes Smart Order Router",
   "main": "build/main/index.js",
-  "typings": "build/main/index.d.ts",
+  "types": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "repository": {
     "type": "git",
