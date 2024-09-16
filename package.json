@@ -1,13 +1,14 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.84",
+  "version": "0.0.85",
   "description": "Hermes Smart Order Router",
   "main": "build/main/index.js",
-  "type": "build/main/index.d.ts",
+  "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "publishConfig": {
     "access": "public",
     "main": "build/main/index.js",
+    "typings": "build/main/index.d.ts",
     "type": "build/main/index.d.ts",
     "module": "build/module/index.js"
   },
@@ -23,7 +24,7 @@
     "compile-router": "npx typechain --target ethers-v5 --out-dir src/types/other './node_modules/@uniswap/swap-router-contracts/artifacts/contracts/**/*.json'",
     "compile-narwhal": "npx typechain --target ethers-v5 --out-dir src/types/other './node_modules/@uniswap/narwhal/artifacts/contracts/**/*.json'",
     "compile-external-types": "npx typechain --target ethers-v5 --out-dir src/types/other 'src/abis/**/*.json'",
-    "build": "run-p compile-v3-types compile-v2-types compile-router compile-narwhal compile-external-types && run-p build:main && run-p build:module",
+    "build": "run-p compile-v3-types compile-v2-types compile-router compile-narwhal compile-external-types && run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "fix": "run-s fix:*",
@@ -118,6 +119,5 @@
   },
   "oclif": {
     "commands": "./cli/commands"
-  },
-  "packageManager": "yarn@4.5.0"
+  }
 }
