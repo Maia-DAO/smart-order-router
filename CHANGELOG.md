@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.81](https://github.com/Maia-DAO/smart-order-router/compare/v0.0.79...v0.0.81) (2024-09-16)
+
+
+### Bug Fixes
+
+* update bump script to remove push commands ([b02ac0a](https://github.com/Maia-DAO/smart-order-router/commit/b02ac0a01b0844378873427338094cb8ac70c3a7))
+
 ### [3.6.0](https://github.com/Uniswap/smart-order-router/compare/v3.5.0...v3.6.0) (2023-02-24)
 
 ### [3.0.1](https://github.com/Uniswap/smart-order-router/compare/v2.10.2...v3.0.1) (2022-11-20)
