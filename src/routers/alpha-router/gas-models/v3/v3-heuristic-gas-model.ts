@@ -77,7 +77,7 @@ export class V3HeuristicGasModelFactory extends IOnChainGasModelFactory {
 
   constructor(_isBrowser?: boolean) {
     super();
-    if (!_isBrowser) this.isBowser = false;
+    if (_isBrowser !== undefined && !_isBrowser) this.isBowser = false;
   }
 
   public async buildGasModel({

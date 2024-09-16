@@ -4,7 +4,6 @@ import { FeeAmount, Pair, Pool, TradeType } from 'hermes-v2-sdk';
 import JSBI from 'jsbi';
 import _ from 'lodash';
 import { ChainId, NativeToken } from 'maia-core-sdk';
-import * as zlib from 'zlib';
 
 import { IV2PoolProvider } from '../providers';
 import { IPortionProvider } from '../providers/portion-provider';
@@ -184,7 +183,8 @@ export function getGasCostInNativeCurrency(
   return costNativeCurrency;
 }
 
-let brotli: any;
+let brotliCompress: any;
+let BROTLI_PARAM_QUALITY: any;
 
 export async function getArbitrumBytes(
   data: string,
@@ -195,19 +195,30 @@ export async function getArbitrumBytes(
   const buffer = Buffer.from(data.replace('0x', ''), 'hex');
 
   let compressed;
+
   if (isBowser) {
-    if (!brotli) {
+    if (!brotliCompress) {
       // Import is async in browsers due to wasm requirements!
-      brotli = await import('brotli-wasm').then((m) => m.default);
+      const { compress } = await import('brotli-wasm').then((m) => m.default);
+      brotliCompress = compress;
     }
-    compressed = brotli.compress(buffer, {
+
+    compressed = brotliCompress(buffer, {
       quality: 0,
     });
   } else {
+    if (!brotliCompress) {
+      const { brotliCompressSync, constants } = await import('zlib').then(
+        (m) => m.default
+      );
+      brotliCompress = brotliCompressSync;
+      BROTLI_PARAM_QUALITY = constants.BROTLI_PARAM_QUALITY;
+    }
+
     // In Node.js environments, use zlib
-    compressed = zlib.brotliCompressSync(buffer, {
+    compressed = brotliCompress(buffer, {
       params: {
-        [zlib.constants.BROTLI_PARAM_QUALITY]: 0,
+        [BROTLI_PARAM_QUALITY]: 0,
       },
     });
   }
