@@ -24,7 +24,7 @@
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix",
     "prepare-release": "run-s cov:check doc:html version doc:publish",
-    "bump": "yarn version patch && git add package.json yarn.lock && git commit -m 'chore: bump version' && git push && git push --tags"
+    "bump": "yarn version patch && git add package.json yarn.lock && git commit -m 'chore: bump version'"
   },
   "engines": {
     "node": ">=10"
