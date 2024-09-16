@@ -1,6 +1,6 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.85",
+  "version": "0.0.86",
   "description": "Hermes Smart Order Router",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
