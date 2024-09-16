@@ -1645,8 +1645,7 @@ export class AlphaRouter
     const mixedSupportedInChain = MIXED_SUPPORTED.includes(this.chainId);
     const shouldQueryMixedProtocol =
       protocols.includes(Protocol.MIXED) ||
-      (noProtocolsSpecified && mixedSupportedInChain) ||
-      stableProtocolSpecified;
+      (noProtocolsSpecified && mixedSupportedInChain);
     const mixedProtocolAllowed =
       mixedSupportedInChain && tradeType === TradeType.EXACT_INPUT;
 
