@@ -1,6 +1,6 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.79",
+  "version": "0.0.80",
   "description": "Hermes Smart Order Router",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -23,7 +23,8 @@
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix",
-    "prepare-release": "run-s cov:check doc:html version doc:publish"
+    "prepare-release": "run-s cov:check doc:html version doc:publish",
+    "bump": "yarn version patch && git add package.json yarn.lock && git commit -m 'chore: bump version' && git push && git push --tags"
   },
   "engines": {
     "node": ">=10"
