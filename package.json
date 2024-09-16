@@ -1,7 +1,10 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.83",
+  "version": "0.0.84",
   "description": "Hermes Smart Order Router",
+  "main": "build/main/index.js",
+  "type": "build/main/index.d.ts",
+  "module": "build/module/index.js",
   "publishConfig": {
     "access": "public",
     "main": "build/main/index.js",
