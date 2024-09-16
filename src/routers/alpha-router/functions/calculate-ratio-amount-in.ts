@@ -10,7 +10,7 @@ export function calculateRatioAmountIn(
 ): CurrencyAmount {
   // formula: amountToSwap = (inputBalance - (optimalRatio * outputBalance)) / ((optimalRatio * inputTokenPrice) + 1))
   const amountToSwapRaw = new Fraction(inputBalance.quotient)
-    .subtract(optimalRatio.multiply(outputBalance.quotient))
+    .subtract(optimalRatio.multiply(outputBalance))
     .divide(optimalRatio.multiply(inputTokenPrice).add(1));
 
   if (amountToSwapRaw.lessThan(0)) {
