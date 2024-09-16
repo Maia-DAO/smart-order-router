@@ -1,10 +1,13 @@
 {
   "name": "hermes-smart-order-router",
-  "version": "0.0.82",
+  "version": "0.0.83",
   "description": "Hermes Smart Order Router",
-  "main": "build/main/index.js",
-  "types": "build/main/index.d.ts",
-  "module": "build/module/index.js",
+  "publishConfig": {
+    "access": "public",
+    "main": "build/main/index.js",
+    "type": "build/main/index.d.ts",
+    "module": "build/module/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Maia-DAO/smart-order-router.git"
