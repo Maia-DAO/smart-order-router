@@ -5,6 +5,7 @@ import { TokenList } from '@uniswap/token-lists';
 import retry from 'async-retry';
 import { Protocol, SwapRouter, Trade } from 'hermes-swap-router-sdk';
 import {
+  FeeAmount,
   Pool,
   Position,
   SqrtPriceMath,
@@ -739,6 +740,47 @@ export class AlphaRouter
       this.chainId,
       this.blockedTokenListProvider,
       this.tokenValidatorProvider
+    );
+  }
+
+  public async routeToGetRatio(
+    token0Balance: CurrencyAmount,
+    token1Balance: CurrencyAmount,
+    fee: FeeAmount,
+    tickLower: number,
+    tickUpper: number,
+    swapAndAddConfig: SwapAndAddConfig,
+    swapAndAddOptions?: SwapAndAddOptions,
+    routingConfig: Partial<AlphaRouterConfig> = DEFAULT_ROUTING_CONFIG_BY_CHAIN(
+      this.chainId
+    )
+  ): Promise<SwapToRatioResponse> {
+    const pool = (
+      await this.v3PoolProvider.getPools([
+        [token0Balance.currency.wrapped, token1Balance.currency.wrapped, fee],
+      ])
+    ).getPool(
+      token0Balance.currency.wrapped,
+      token1Balance.currency.wrapped,
+      fee
+    );
+
+    if (!pool) throw new Error('Pool not found');
+
+    const position = new Position({
+      pool: pool,
+      liquidity: 0,
+      tickLower: tickLower,
+      tickUpper: tickUpper,
+    });
+
+    return await this.routeToRatio(
+      token0Balance,
+      token1Balance,
+      position,
+      swapAndAddConfig,
+      swapAndAddOptions,
+      routingConfig
     );
   }
 
