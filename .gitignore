@@ -12,3 +12,8 @@ types
 types/*
 .env
 cache/
+
+# .yarn files
+.yarn/cache
+.yarn/versions
+.yarn/install-state.gz
