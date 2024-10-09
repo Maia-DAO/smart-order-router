@@ -3533,7 +3533,7 @@ hermes-universal-router-sdk@^0.0.83:
     hermes-v2-sdk "0.0.88"
     maia-core-sdk "1.0.43"
 
-hermes-v2-sdk@0.0.88, hermes-v2-sdk@^0.0.88:
+hermes-v2-sdk@0.0.88:
   version "0.0.88"
   resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.88.tgz#716ae60f45a68bb95f31ebc37b1c53aff039772d"
   integrity sha512-rjP3ALVyV8BZWOUA0BW+nc6hyxG1o0wF1o6uEvFnBqND0HGh8zT1k9p2uS8tTOCmCC3OqC5AEHtBs/3n3CcFwg==
@@ -3548,6 +3548,23 @@ hermes-v2-sdk@0.0.88, hermes-v2-sdk@^0.0.88:
     jsbi "^3.1.5"
     lodash.clonedeep "^4.5.0"
     maia-core-sdk "^1.0.43"
+    tiny-invariant "^1.1.0"
+
+hermes-v2-sdk@^0.0.89:
+  version "0.0.89"
+  resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.89.tgz#21db9ed8908bd51f560c215f00bb3fc658ed9e5a"
+  integrity sha512-7oT08Qz/7LpYPo8/Sq6zHHa8OJ7FOSyKbJASPbklcK1/Zr8CR44qLf9Uk20ABBiIz/RpigsfJulMECH9XWQ69w==
+  dependencies:
+    "@ethersproject/abi" "^5.7.0"
+    "@ethersproject/solidity" "^5.7.0"
+    "@types/lodash.clonedeep" "^4.5.9"
+    "@uniswap/swap-router-contracts" "^1.3.0"
+    "@uniswap/v3-periphery" "^1.1.1"
+    "@uniswap/v3-staker" "1.0.0"
+    bignumber.js "^9.0.2"
+    jsbi "^3.1.5"
+    lodash.clonedeep "^4.5.0"
+    maia-core-sdk "^1.0.44"
     tiny-invariant "^1.1.0"
 
 hmac-drbg@^1.0.1:
@@ -4132,6 +4149,18 @@ maia-core-sdk@1.0.43, maia-core-sdk@^1.0.43:
   version "1.0.43"
   resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.43.tgz#616bfe5264fe38e5c5c60d88d77c5a51250c39c4"
   integrity sha512-V9uf4EoWOtX4CQmWZD4C9CS7bmWyyvvxKyK6AgIs2TVAft+seI1PqDAoDD95dIzp/8ucfsyH3yT85uyYMo1Rfg==
+  dependencies:
+    "@ethersproject/address" "^5.7.0"
+    big.js "^5.2.2"
+    decimal.js-light "^2.5.0"
+    jsbi "^3.1.5"
+    tiny-invariant "^1.1.0"
+    toformat "^2.0.0"
+
+maia-core-sdk@^1.0.44:
+  version "1.0.44"
+  resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.44.tgz#744f8d4e5b60f61e83a428d915286d64e85930d4"
+  integrity sha512-XcxIjpR/TqGgiSX0uJLnTab0f5dNi4dQuFbdqDOPSx3FcztBgvC5aGxi6t0Z15UGxfUbAi/zzjPpdRQibrXfQw==
   dependencies:
     "@ethersproject/address" "^5.7.0"
     big.js "^5.2.2"
