@@ -3510,47 +3510,30 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hermes-swap-router-sdk@^0.0.54:
-  version "0.0.54"
-  resolved "https://registry.yarnpkg.com/hermes-swap-router-sdk/-/hermes-swap-router-sdk-0.0.54.tgz#4d19f4ee030b5b3c5eb1c94d0097df945f408186"
-  integrity sha512-PL7OO577k2W57V6OTwM3m/luHr3mzNEwBJVT5W7ex62Grcj0AGuLfGyRG4aPcOc+19Ue3TLf0063He8xeTcE9A==
+hermes-swap-router-sdk@^0.0.55:
+  version "0.0.55"
+  resolved "https://registry.yarnpkg.com/hermes-swap-router-sdk/-/hermes-swap-router-sdk-0.0.55.tgz#05990a0085d8d3a939d2944ab95681ef1496764d"
+  integrity sha512-qeuHhXZxahEGg3hdKW2qu/N9qgSGxzcjyXIX5xDAOARZCBG6Bv9brwYXmDZuJay6bbSVDF4cZqyHfrR4h4HUwg==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@uniswap/swap-router-contracts" "^1.3.0"
-    hermes-v2-sdk "0.0.88"
-    maia-core-sdk "1.0.43"
+    hermes-v2-sdk "0.0.89"
+    maia-core-sdk "1.0.44"
 
-hermes-universal-router-sdk@^0.0.83:
-  version "0.0.83"
-  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.83.tgz#0d691dd529c28369090829845cc4055f9255b01b"
-  integrity sha512-mpSluaoIjL43zmbtFyLBq/RF/BuYK8+zOPD2nuzgm2yiUuxZDaCSkufXFuGTiy/sWV62wbaviXi1pCfxWWmS/w==
+hermes-universal-router-sdk@^0.0.84:
+  version "0.0.84"
+  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.84.tgz#5ce680bb29a586eb4ec66b18aef17059d798dfb3"
+  integrity sha512-tEBImxbHxCQ7DCGs8P0cb8NAtv0sIQgyF6GDtv9WSLlPp7ApHQWbbsauVXPkuxPcOaswxXTPklbfpIAsbisIWg==
   dependencies:
     "@uniswap/permit2-sdk" "^1.3.0"
     "@uniswap/universal-router" "1.6.0"
     bignumber.js "^9.0.2"
     ethers "^5.7.0"
-    hermes-swap-router-sdk "^0.0.54"
-    hermes-v2-sdk "0.0.88"
-    maia-core-sdk "1.0.43"
+    hermes-swap-router-sdk "^0.0.55"
+    hermes-v2-sdk "0.0.89"
+    maia-core-sdk "1.0.44"
 
-hermes-v2-sdk@0.0.88:
-  version "0.0.88"
-  resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.88.tgz#716ae60f45a68bb95f31ebc37b1c53aff039772d"
-  integrity sha512-rjP3ALVyV8BZWOUA0BW+nc6hyxG1o0wF1o6uEvFnBqND0HGh8zT1k9p2uS8tTOCmCC3OqC5AEHtBs/3n3CcFwg==
-  dependencies:
-    "@ethersproject/abi" "^5.7.0"
-    "@ethersproject/solidity" "^5.7.0"
-    "@types/lodash.clonedeep" "^4.5.9"
-    "@uniswap/swap-router-contracts" "^1.3.0"
-    "@uniswap/v3-periphery" "^1.1.1"
-    "@uniswap/v3-staker" "1.0.0"
-    bignumber.js "^9.0.2"
-    jsbi "^3.1.5"
-    lodash.clonedeep "^4.5.0"
-    maia-core-sdk "^1.0.43"
-    tiny-invariant "^1.1.0"
-
-hermes-v2-sdk@^0.0.89:
+hermes-v2-sdk@0.0.89, hermes-v2-sdk@^0.0.89:
   version "0.0.89"
   resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.89.tgz#21db9ed8908bd51f560c215f00bb3fc658ed9e5a"
   integrity sha512-7oT08Qz/7LpYPo8/Sq6zHHa8OJ7FOSyKbJASPbklcK1/Zr8CR44qLf9Uk20ABBiIz/RpigsfJulMECH9XWQ69w==
@@ -4145,19 +4128,7 @@ lru_map@^0.3.3:
   resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
   integrity sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==
 
-maia-core-sdk@1.0.43, maia-core-sdk@^1.0.43:
-  version "1.0.43"
-  resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.43.tgz#616bfe5264fe38e5c5c60d88d77c5a51250c39c4"
-  integrity sha512-V9uf4EoWOtX4CQmWZD4C9CS7bmWyyvvxKyK6AgIs2TVAft+seI1PqDAoDD95dIzp/8ucfsyH3yT85uyYMo1Rfg==
-  dependencies:
-    "@ethersproject/address" "^5.7.0"
-    big.js "^5.2.2"
-    decimal.js-light "^2.5.0"
-    jsbi "^3.1.5"
-    tiny-invariant "^1.1.0"
-    toformat "^2.0.0"
-
-maia-core-sdk@^1.0.44:
+maia-core-sdk@1.0.44, maia-core-sdk@^1.0.44:
   version "1.0.44"
   resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.44.tgz#744f8d4e5b60f61e83a428d915286d64e85930d4"
   integrity sha512-XcxIjpR/TqGgiSX0uJLnTab0f5dNi4dQuFbdqDOPSx3FcztBgvC5aGxi6t0Z15UGxfUbAi/zzjPpdRQibrXfQw==
