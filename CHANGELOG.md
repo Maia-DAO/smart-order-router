@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.91](https://github.com/Maia-DAO/smart-order-router/compare/v0.0.90...v0.0.91) (2024-10-15)
+
 ### [0.0.90](https://github.com/Maia-DAO/smart-order-router/compare/v0.0.89...v0.0.90) (2024-10-09)
 
 ### [0.0.86](https://github.com/Maia-DAO/smart-order-router/compare/v0.0.85...v0.0.86) (2024-09-16)
