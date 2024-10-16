@@ -121,28 +121,28 @@ export const DAI_ARBITRUM = new NativeToken(
 );
 export const WuOPsETH_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,
-  '0x0B52D7bc036f6F74d8eA5Ea02A9fa4CDd12EA784',
+  '0x3e926849b99dfCCEA2D1527d86f1ce6102ab11e8',
   18,
-  'WuL1s-USDT',
+  'WuOPs-ETH',
   'Wrapped Ulysses Optimism Stack ETH'
 );
 export const WuOPsUSDC_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,
-  '0x9fa578DBf15C86b1eE599aa4507251311fd6FD37',
+  '0xc6e54f2a194D8f08DFD5a19D012D5A80A1Cc9395',
   18,
   'WuOPs-USDC',
   'Wrapped Ulysses Optimism Stack USDC'
 );
 export const WuL1sUSDC_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,
-  '0xD4FcbADA835D5A2814Db6D4521a668ab0773D3f3',
+  '0x984CcfafE1426342D24258a72E2dbEBa1660A386',
   18,
   'WuL1s-USDC',
   'Wrapped Ulysses Alt L1 USDC'
 );
 export const WuL1sUSDT_ARBITRUM = new NativeToken(
   ChainId.ARBITRUM_ONE,
-  '0x6284885cC2b1934A53E92d01BF55995314190C19',
+  '0x12c9aBDf9493ab84ccDBbBBEF885753f42f59c42',
   18,
   'WuL1s-USDT',
   'Wrapped Ulysses Alt L1 USDT'
