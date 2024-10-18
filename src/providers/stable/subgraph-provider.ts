@@ -197,7 +197,9 @@ export class StableSubgraphProvider implements IStableSubgraphProvider {
         // TODO: Filter pools with low tvl
         // if (parseFloat(pool.totalValueLockedETH) < 0.01) return false;
 
-        return parseInt(pool.totalShares) > 0;
+        // TODO: Check if we should revert change to parseInt
+        // return parseInt(pool.totalShares) > 0;
+        return parseFloat(pool.totalShares) > 0;
       })
       .map((pool) => {
         const totalSharesNumber = Number(pool.totalShares);
