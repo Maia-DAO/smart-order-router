@@ -49,7 +49,7 @@ const SUBGRAPH_URL_BY_CHAIN: { [chainId in ChainId]?: string } = {
   [ChainId.OPTIMISM]: '',
   [ChainId.ARBITRUM_ONE]:
     // 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-minimal',
-    'https://gateway.thegraph.com/api/0ae45f0bf40ae2e73119b44ccd755967/subgraphs/id/FbCGRftH4a3yZugY7TnbYgPJVEv2LvMT6oF1fxPe9aJM',
+    'https://gateway.thegraph.com/api/3e9ce54904ec5ee003de7785f0d24a21/subgraphs/id/FbCGRftH4a3yZugY7TnbYgPJVEv2LvMT6oF1fxPe9aJM',
   [ChainId.SEPOLIA]:
     'https://subgraph.satsuma-prod.com/917209a9d9b8/maias-team--1290408/sepolia-v3/api',
 };
