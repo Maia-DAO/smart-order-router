@@ -3510,33 +3510,33 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hermes-swap-router-sdk@^0.0.58:
-  version "0.0.58"
-  resolved "https://registry.yarnpkg.com/hermes-swap-router-sdk/-/hermes-swap-router-sdk-0.0.58.tgz#29451763208fa105f98c7a60169975b80ced0a2a"
-  integrity sha512-TIyL2gLyR/7CFqbWmHV2xDEH8ZHBaLeBnlcXC3pJdEee6Czjpffv9Mal0FduPQfzeJHsX5qCsEKDa2TqmTnvow==
+hermes-swap-router-sdk@^0.0.60:
+  version "0.0.60"
+  resolved "https://registry.yarnpkg.com/hermes-swap-router-sdk/-/hermes-swap-router-sdk-0.0.60.tgz#04a4689aa45e7a37f4e384968b9abc1202809714"
+  integrity sha512-zSm7W61zfDZegd/KydlFfV4OsHqX6lQ0Kvxz8Lrd5GZAjVSy5CJG2XgSbTRiLqxrE2NaWa2lhcw8uFvd1aToyQ==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@uniswap/swap-router-contracts" "^1.3.0"
-    hermes-v2-sdk "0.0.92"
-    maia-core-sdk "1.0.46"
+    hermes-v2-sdk "0.1.0"
+    maia-core-sdk "1.0.47"
 
-hermes-universal-router-sdk@^0.0.86:
-  version "0.0.86"
-  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.86.tgz#299430952734fbb3aa0678e1211f6057d8c84b4f"
-  integrity sha512-Ac3HM5yBYHp+pYp/2+uivWpLxdNjwClbjJMkXIkdHIPUmpWoMcr/hY7EOX3/o7ozTt9stbqynv2bqq1KCIu06Q==
+hermes-universal-router-sdk@^0.0.90:
+  version "0.0.90"
+  resolved "https://registry.yarnpkg.com/hermes-universal-router-sdk/-/hermes-universal-router-sdk-0.0.90.tgz#5878b83b94ec0fb92fce0787df64739071d3bb09"
+  integrity sha512-e67yvUDzxTjxVrsStKAFnNKc57C9kHtrxC37fvwjib4bnBK3waaV8yQkt74i9pOgfF3chTeyBQCo4eusapYMIg==
   dependencies:
     "@uniswap/permit2-sdk" "^1.3.0"
     "@uniswap/universal-router" "1.6.0"
     bignumber.js "^9.0.2"
     ethers "^5.7.0"
-    hermes-swap-router-sdk "^0.0.58"
-    hermes-v2-sdk "0.0.92"
-    maia-core-sdk "1.0.46"
+    hermes-swap-router-sdk "^0.0.60"
+    hermes-v2-sdk "0.1.0"
+    maia-core-sdk "1.0.47"
 
-hermes-v2-sdk@0.0.92, hermes-v2-sdk@^0.0.92:
-  version "0.0.92"
-  resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.0.92.tgz#29ad5e1d344ef53f114e851ace3fc22183690b7d"
-  integrity sha512-7fvJe6NJUYtSk+yMsPG/weezMSGgai9v7n0/Fze8IA+3BC6tZ1CgdIOuHwbYdfGyWlP2PSSsLb1Q2KljJm+kNQ==
+hermes-v2-sdk@0.1.0, hermes-v2-sdk@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/hermes-v2-sdk/-/hermes-v2-sdk-0.1.0.tgz#85f0ef4c191ce5bdfcedfc5ec55586d58519d45d"
+  integrity sha512-rx6hxB5LothNgaBRpkHBfO54yinLsg9GK7N/Y0k5Oo29oqa6260Osk7oJhr7bs55jaowt4vyZZT7JeZcUM/4fw==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/solidity" "^5.7.0"
@@ -3547,7 +3547,7 @@ hermes-v2-sdk@0.0.92, hermes-v2-sdk@^0.0.92:
     bignumber.js "^9.0.2"
     jsbi "^3.1.5"
     lodash.clonedeep "^4.5.0"
-    maia-core-sdk "^1.0.46"
+    maia-core-sdk "^1.0.47"
     tiny-invariant "^1.1.0"
 
 hmac-drbg@^1.0.1:
@@ -4128,10 +4128,10 @@ lru_map@^0.3.3:
   resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
   integrity sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==
 
-maia-core-sdk@1.0.46, maia-core-sdk@^1.0.46:
-  version "1.0.46"
-  resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.46.tgz#1f9b1e0c7dc02203f586c7472da1b12d1f83be86"
-  integrity sha512-eQAUgrx6QFXE9UvlF4b30SKw+RaKdUUVIV62G1LPo55iQKgaqKc7kGvGJ3ePpUANUm6CJXKMMoIKsHbk0yQOJw==
+maia-core-sdk@1.0.47, maia-core-sdk@^1.0.47:
+  version "1.0.47"
+  resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.47.tgz#7144b47c3d2b30b411c5a12e948c69d3c29b927b"
+  integrity sha512-qWAbuSolByCfO/Ampkcf2//jBf9te631qsnPq3T/E2S20sIktPF+T3cSSuf6UUV6+Yb0CQP1tmz8cXTR6gdXaw==
   dependencies:
     "@ethersproject/address" "^5.7.0"
     big.js "^5.2.2"
