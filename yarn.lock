@@ -4128,10 +4128,10 @@ lru_map@^0.3.3:
   resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
   integrity sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==
 
-maia-core-sdk@1.0.58, maia-core-sdk@1.0.78, maia-core-sdk@^1.0.58:
-  version "1.0.78"
-  resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.0.78.tgz#64b72f75940935ab4c478edafa805eb22acfd0f0"
-  integrity sha512-8f7iK54eLtbOcc8yhQFjdJwDOQC9PNnL6Rs3Ph99sMPTeOZsf6bbEfQJUsEcDNJdYGuXP3y4jsDvVvYFY5AYVw==
+maia-core-sdk@1.0.58, maia-core-sdk@1.2.0, maia-core-sdk@^1.0.58:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/maia-core-sdk/-/maia-core-sdk-1.2.0.tgz#114b79c93188e0aa9f68d16a5e62c0d43551eaae"
+  integrity sha512-VA95KK2GqOwGHopJhsT2SEQtsfKjjefzN7WHvYcmPriKKf5sSHOZuI3B+kHOqSTqX6fB8c11/HpxU8VvjJZ2ow==
   dependencies:
     "@ethersproject/address" "^5.7.0"
     big.js "^5.2.2"
