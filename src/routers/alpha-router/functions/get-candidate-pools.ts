@@ -17,19 +17,18 @@ import {
 import {
   DAI_ARBITRUM,
   DAI_SEPOLIA,
+  HERMES_ARBITRUM,
   ITokenProvider,
+  MAIA_ARBITRUM,
   USDC_ARBITRUM,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
   USDT_SEPOLIA,
   WBTC_ARBITRUM,
-  WuDAI_SEPOLIA,
   WuL1sUSDC_ARBITRUM,
   WuL1sUSDT_ARBITRUM,
   WuOPsETH_ARBITRUM,
   WuOPsUSDC_ARBITRUM,
-  WuUSDC_SEPOLIA,
-  WuUSDT_SEPOLIA,
 } from '../../../providers/token-provider';
 import {
   IV2PoolProvider,
@@ -120,9 +119,6 @@ export type MixedRouteGetCandidatePoolsParams = {
 const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
   [ChainId.SEPOLIA]: [
     WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!,
-    WuUSDC_SEPOLIA,
-    WuDAI_SEPOLIA,
-    WuUSDT_SEPOLIA,
     USDC_SEPOLIA,
     DAI_SEPOLIA,
     USDT_SEPOLIA,
@@ -137,13 +133,17 @@ const baseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
 };
 
 const crossChainBaseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
-  [ChainId.SEPOLIA]: [WuUSDC_SEPOLIA, WuDAI_SEPOLIA, WuUSDT_SEPOLIA],
+  [ChainId.SEPOLIA]: [],
   [ChainId.ARBITRUM_ONE]: [
     WuOPsETH_ARBITRUM,
     WuOPsUSDC_ARBITRUM,
     WuL1sUSDC_ARBITRUM,
     WuL1sUSDT_ARBITRUM,
   ],
+};
+const ecosystemBaseTokensByChain: { [chainId in ChainId]?: NativeToken[] } = {
+  [ChainId.SEPOLIA]: [],
+  [ChainId.ARBITRUM_ONE]: [HERMES_ARBITRUM, MAIA_ARBITRUM],
 };
 
 class SubcategorySelectionPools<SubgraphPool> {
@@ -728,10 +728,10 @@ export async function getV3CandidatePools({
     .slice(0, topNDirectSwaps)
     .value();
 
-  const crossChainBaseTokens = crossChainBaseTokensByChain[chainId] ?? [];
+  const ecosystemBaseTokens = ecosystemBaseTokensByChain[chainId] ?? [];
   const topByTVLUsingBaseConfig = 20;
 
-  const topByTVLUsingBase = _(crossChainBaseTokens)
+  const topByTVLUsingBase = _(ecosystemBaseTokens)
     .flatMap((token: NativeToken) => {
       return _(subgraphPoolsSorted)
         .filter((subgraphPool) => {

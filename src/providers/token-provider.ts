@@ -156,6 +156,21 @@ export const ARB_ARBITRUM = new NativeToken(
   'Arbitrum'
 );
 
+export const HERMES_ARBITRUM = new NativeToken(
+  ChainId.ARBITRUM_ONE,
+  '0x45940000009600102A1c002F0097C4A500fa00AB',
+  18,
+  'HERMES',
+  'Hermes'
+);
+export const MAIA_ARBITRUM = new NativeToken(
+  ChainId.ARBITRUM_ONE,
+  '0x00000000ea00F3F4000e7Ed5Ed91965b19f1009B',
+  18,
+  'MAIA',
+  'Maia'
+);
+
 export class TokenProvider implements ITokenProvider {
   constructor(
     private chainId: ChainId,
